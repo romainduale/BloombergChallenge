@@ -1,0 +1,432 @@
+{
+  "as_of_date": "2026-10-07",
+  "universe_tickers": 10420,
+  "history_tickers": 1262,
+  "history_weight_pct": 84.17039229655597,
+  "benchmark_conflicts": [
+    {
+      "date": "2026-10-07",
+      "px_last_primary": 2575.81,
+      "px_last_alternative": 2576.08
+    }
+  ],
+  "history_blocks": [
+    {
+      "path": "supplementary/prices_1y.csv.gz",
+      "field": "px_last(dates=range(-1Y,0D))",
+      "source_header_row": 3,
+      "rows": 366,
+      "tickers": 1262,
+      "missing": 147814,
+      "nonpositive": 0,
+      "start_date": "2025-10-07",
+      "end_date": "2026-10-07"
+    },
+    {
+      "path": "supplementary/volumes_1y.csv.gz",
+      "field": "px_volume(dates=range(-1Y,0D))",
+      "source_header_row": 373,
+      "rows": 366,
+      "tickers": 1262,
+      "missing": 147693,
+      "nonpositive": 0,
+      "start_date": "2025-10-07",
+      "end_date": "2026-10-07"
+    },
+    {
+      "path": "supplementary/prices_3y.csv.gz",
+      "field": "px_last(dates=range(-3Y,0D))",
+      "source_header_row": 743,
+      "rows": 1097,
+      "tickers": 1262,
+      "missing": 452583,
+      "nonpositive": 0,
+      "start_date": "2023-10-07",
+      "end_date": "2026-10-07"
+    },
+    {
+      "path": "supplementary/prices_5y.csv.gz",
+      "field": "px_last(dates=range(-5Y,0D))",
+      "source_header_row": 1843,
+      "rows": 1827,
+      "tickers": 1262,
+      "missing": 763559,
+      "nonpositive": 0,
+      "start_date": "2021-10-07",
+      "end_date": "2026-10-07"
+    },
+    {
+      "path": "supplementary/volumes_3y.csv.gz",
+      "field": "px_volume(dates=range(-3Y,0D))",
+      "source_header_row": 3674,
+      "rows": 1097,
+      "tickers": 1262,
+      "missing": 452520,
+      "nonpositive": 0,
+      "start_date": "2023-10-07",
+      "end_date": "2026-10-07"
+    },
+    {
+      "path": "supplementary/benchmark_5y.csv.gz",
+      "field": "px_last(dates=range(-5Y,0D))",
+      "source_header_row": 4774,
+      "rows": 1827,
+      "tickers": 1,
+      "missing": 522,
+      "nonpositive": 0,
+      "start_date": "2021-10-07",
+      "end_date": "2026-10-07"
+    },
+    {
+      "path": "data/prices_10y.csv.gz",
+      "field": "px_last(dates=range(-10Y,0D))",
+      "source_header_row": 6605,
+      "rows": 3653,
+      "tickers": 1262,
+      "missing": 1636079,
+      "nonpositive": 0,
+      "start_date": "2016-10-07",
+      "end_date": "2026-10-07"
+    },
+    {
+      "path": "data/volumes_10y.csv.gz",
+      "field": "px_volume(dates=range(-10Y,0D))",
+      "source_header_row": 10261,
+      "rows": 3653,
+      "tickers": 1262,
+      "missing": 1636124,
+      "nonpositive": 0,
+      "start_date": "2016-10-07",
+      "end_date": "2026-10-07"
+    },
+    {
+      "path": "supplementary/benchmark_10y.csv.gz",
+      "field": "px_last(dates=range(-10Y,0D))",
+      "source_header_row": 13917,
+      "rows": 3653,
+      "tickers": 1,
+      "missing": 821,
+      "nonpositive": 0,
+      "start_date": "2016-10-07",
+      "end_date": "2026-10-07"
+    }
+  ],
+  "roe_duplicate_verified": true,
+  "rmom_momentum_different_values": {
+    "mom_1m": 119,
+    "mom_3m": 119
+  },
+  "unlabeled_formulas_count": 1,
+  "sources": [
+    {
+      "file": "Classeur7wls_roe2(1).xlsx",
+      "size_bytes": 743961,
+      "sha256": "4fac7454c4ab52df3b06f4787270d1adbf2403c33d168947df49b6eb8b03a6cd"
+    },
+    {
+      "file": "wls_benchmark_10y 1(1).xlsx",
+      "size_bytes": 69599,
+      "sha256": "5eb8fdfce928cef6d9f0353ecc81db5630cf7e42104b6043cdcca5bea364e7fb"
+    },
+    {
+      "file": "wls_benchmark_10y(1).xlsx",
+      "size_bytes": 67724,
+      "sha256": "80761f292aea1ca743bcedf0398cc622793d99aee1779b9753301228b217a1c8"
+    },
+    {
+      "file": "wls_eps(1).xlsx",
+      "size_bytes": 235254,
+      "sha256": "eca10ba9463820f2b5b18ea1a0eafbd8d8909630ae3a0fc7c318cfd296a7a019"
+    },
+    {
+      "file": "wls_eps_rev_breadth_1m_3m(1).xlsx",
+      "size_bytes": 492852,
+      "sha256": "c53b429fa8a54df065e1b1395cabc1103393994dc8feb638eb7da2e3d6300081"
+    },
+    {
+      "file": "wls_eps_revisions(1).xlsx",
+      "size_bytes": 1013459,
+      "sha256": "154b268884954f052188469f52dfcc8dc2a313c14c654038bcd9fffc29b2177c"
+    },
+    {
+      "file": "wls_greater_0,01 1(1).xlsx",
+      "size_bytes": 102929014,
+      "sha256": "d2d48a860017b134f3ae8e97dfa32bf38bb84c3c3a70cfeb742fa52015acd5b2"
+    },
+    {
+      "file": "wls_leverage(1).xlsx",
+      "size_bytes": 917119,
+      "sha256": "fc1eeb5a6844e695079bbebc4f09701ffc279eca3354a9c2cf4f60efe06c7bfc"
+    },
+    {
+      "file": "wls_momentum(1).xlsx",
+      "size_bytes": 744400,
+      "sha256": "88e84770615fc91fddfd3ebd7347c26aafe10231e54ae3b7ab0701a99671eb71"
+    },
+    {
+      "file": "wls_rmom_inputs(1).xlsx",
+      "size_bytes": 498543,
+      "sha256": "4d7c2dedf47c067039ba82e47eddafb101890f0c21699b37ca9efd01119a24b0"
+    },
+    {
+      "file": "wls_roe(1).xlsx",
+      "size_bytes": 743966,
+      "sha256": "9f3c6cabf5bc311eb4946b65171ab12081b0fb8a124d67fe99c34c4931871f86"
+    },
+    {
+      "file": "wls_static(1).xlsx",
+      "size_bytes": 533750,
+      "sha256": "efb0ee47fabba889a1811be33e19150d755f8a357b1bb416f443033feb7392f8"
+    },
+    {
+      "file": "wls_universe(1).xlsx",
+      "size_bytes": 653401,
+      "sha256": "5cf8f40a4f7726044c5e7d548d82b95f46802bf9ba067a3565f0457e3e6e0d68"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "data/universe.csv",
+      "rows": 10420,
+      "columns": 7,
+      "size_bytes": 1250846,
+      "sha256": "1176864cec1ad4358d8abcc9f57dde8955d0198b52f0c8c4b129a9a2d56aa2a4"
+    },
+    {
+      "path": "data/static.csv",
+      "rows": 10420,
+      "columns": 6,
+      "size_bytes": 827001,
+      "sha256": "c9e8c7f0ea0ae55bded59be8ecab3cbbccc347e612303065d68d0bbd73e31dbf"
+    },
+    {
+      "path": "data/momentum.csv",
+      "rows": 10420,
+      "columns": 6,
+      "size_bytes": 1000520,
+      "sha256": "e51ff4aec01b6b834b1b7561ceeae7d6dc6d5a4fa6f9971fbfe27796fede4d0b"
+    },
+    {
+      "path": "audit/momentum_conflicts.csv",
+      "rows": 119,
+      "columns": 6,
+      "size_bytes": 13233,
+      "sha256": "e58e760a405448ecbbe04b573f235577918999b1e8024158d0f06fe92c4c6422"
+    },
+    {
+      "path": "data/rmom_inputs.csv",
+      "rows": 10420,
+      "columns": 4,
+      "size_bytes": 660959,
+      "sha256": "e7d9f8fe27fbb7754c51a2ddb782ce30464bfbf95020e6255a4627f8df92cdea"
+    },
+    {
+      "path": "data/eps_actual.csv",
+      "rows": 10420,
+      "columns": 3,
+      "size_bytes": 415778,
+      "sha256": "9ebf61615bf43e62a928ed056bfde28b593b55b08752fd07be1b1482375d7c32"
+    },
+    {
+      "path": "data/eps_estimates.csv",
+      "rows": 10420,
+      "columns": 8,
+      "size_bytes": 1051064,
+      "sha256": "12b12bbb0f574e141bf9dac3032741ec7b567be4e7224cbb84dc86866b97c739"
+    },
+    {
+      "path": "data/roe.csv",
+      "rows": 10420,
+      "columns": 6,
+      "size_bytes": 884673,
+      "sha256": "ae2d022a558c1aaac7f1aff0482c27cbf98d9288e17428853287e67a14355e5b"
+    },
+    {
+      "path": "data/leverage.csv",
+      "rows": 10420,
+      "columns": 12,
+      "size_bytes": 1662847,
+      "sha256": "fefd92906fa45541c580441ca6265dee6905176e0a7021707f1add533e389849"
+    },
+    {
+      "path": "data/revision_breadth.csv",
+      "rows": 10420,
+      "columns": 8,
+      "size_bytes": 483585,
+      "sha256": "423ff6d93a3a69038870016f3aa4bf1ef6f2a42037e09147eadd52290a482952"
+    },
+    {
+      "path": "data/features_snapshot.csv",
+      "rows": 10420,
+      "columns": 42,
+      "size_bytes": 5633352,
+      "sha256": "7797df880e36954c754a7c9edccd70e7e40208686084d13e5f87904c96e08598"
+    },
+    {
+      "path": "data/benchmark_10y.csv",
+      "rows": 3653,
+      "columns": 2,
+      "size_bytes": 82039,
+      "sha256": "2afc0723e814fb69cefc4a0a33d260f6cde15a933cdcd089e8850ac73c27d697"
+    },
+    {
+      "path": "supplementary/benchmark_10y_alternative.csv",
+      "rows": 3653,
+      "columns": 2,
+      "size_bytes": 82039,
+      "sha256": "13ae592063da74a508fc45a33f008c026598269f1fd34af5dc515c52640add5f"
+    },
+    {
+      "path": "audit/benchmark_conflicts.csv",
+      "rows": 1,
+      "columns": 3,
+      "size_bytes": 90,
+      "sha256": "d6a8868e9cec8c25d1a41cbfebaabf35025f29e899ac3d2fd328e3d9552e9af3"
+    },
+    {
+      "path": "supplementary/prices_1y.csv.gz",
+      "field": "px_last(dates=range(-1Y,0D))",
+      "source_header_row": 3,
+      "rows": 366,
+      "tickers": 1262,
+      "missing": 147814,
+      "nonpositive": 0,
+      "start_date": "2025-10-07",
+      "end_date": "2026-10-07",
+      "size_bytes": 879766,
+      "sha256": "0ff11539f7871dbca116d9c79c285e00395fca261ff24c2b18838d69c2232dbd"
+    },
+    {
+      "path": "supplementary/volumes_1y.csv.gz",
+      "field": "px_volume(dates=range(-1Y,0D))",
+      "source_header_row": 373,
+      "rows": 366,
+      "tickers": 1262,
+      "missing": 147693,
+      "nonpositive": 0,
+      "start_date": "2025-10-07",
+      "end_date": "2026-10-07",
+      "size_bytes": 1190124,
+      "sha256": "dea99046141d9d9c1e630e5ef51a9cefd5045278f23caaeab3350b2293d700ac"
+    },
+    {
+      "path": "supplementary/prices_3y.csv.gz",
+      "field": "px_last(dates=range(-3Y,0D))",
+      "source_header_row": 743,
+      "rows": 1097,
+      "tickers": 1262,
+      "missing": 452583,
+      "nonpositive": 0,
+      "start_date": "2023-10-07",
+      "end_date": "2026-10-07",
+      "size_bytes": 2713968,
+      "sha256": "015d18fe5610571ba7af2b7033726b9b779ae2efaaecd123895862c3719dcefa"
+    },
+    {
+      "path": "supplementary/prices_5y.csv.gz",
+      "field": "px_last(dates=range(-5Y,0D))",
+      "source_header_row": 1843,
+      "rows": 1827,
+      "tickers": 1262,
+      "missing": 763559,
+      "nonpositive": 0,
+      "start_date": "2021-10-07",
+      "end_date": "2026-10-07",
+      "size_bytes": 4642963,
+      "sha256": "0b05841695699d05930bd02cd55040f3e08c1fb72f420499783bac9436552bca"
+    },
+    {
+      "path": "supplementary/volumes_3y.csv.gz",
+      "field": "px_volume(dates=range(-3Y,0D))",
+      "source_header_row": 3674,
+      "rows": 1097,
+      "tickers": 1262,
+      "missing": 452520,
+      "nonpositive": 0,
+      "start_date": "2023-10-07",
+      "end_date": "2026-10-07",
+      "size_bytes": 3564457,
+      "sha256": "5bc3a21116a95b2e7694e6c95ea7b769ea6128dc9f47b49c1e94ded25a3e7cf9"
+    },
+    {
+      "path": "supplementary/benchmark_5y.csv.gz",
+      "field": "px_last(dates=range(-5Y,0D))",
+      "source_header_row": 4774,
+      "rows": 1827,
+      "tickers": 1,
+      "missing": 522,
+      "nonpositive": 0,
+      "start_date": "2021-10-07",
+      "end_date": "2026-10-07",
+      "size_bytes": 9296,
+      "sha256": "71e9f80a2e6e86e2ac8ea23736acb192b9a8573b52c935a3bd547a853b0c144d"
+    },
+    {
+      "path": "data/prices_10y.csv.gz",
+      "field": "px_last(dates=range(-10Y,0D))",
+      "source_header_row": 6605,
+      "rows": 3653,
+      "tickers": 1262,
+      "missing": 1636079,
+      "nonpositive": 0,
+      "start_date": "2016-10-07",
+      "end_date": "2026-10-07",
+      "size_bytes": 9605680,
+      "sha256": "3e6d0622430da341dd21499501de4249cb305f2b8f15a73351eaedb3f124a4fe"
+    },
+    {
+      "path": "data/volumes_10y.csv.gz",
+      "field": "px_volume(dates=range(-10Y,0D))",
+      "source_header_row": 10261,
+      "rows": 3653,
+      "tickers": 1262,
+      "missing": 1636124,
+      "nonpositive": 0,
+      "start_date": "2016-10-07",
+      "end_date": "2026-10-07",
+      "size_bytes": 11888563,
+      "sha256": "64d49355ab39398f500c42a21cb8d44210e21ef75fc9a3469bbb1dbe8e945491"
+    },
+    {
+      "path": "supplementary/benchmark_10y.csv.gz",
+      "field": "px_last(dates=range(-10Y,0D))",
+      "source_header_row": 13917,
+      "rows": 3653,
+      "tickers": 1,
+      "missing": 821,
+      "nonpositive": 0,
+      "start_date": "2016-10-07",
+      "end_date": "2026-10-07",
+      "size_bytes": 18613,
+      "sha256": "2cef78a4b42290f86abb3b06aac70f16b3e66953745c1f0348febcf9ba0ecc27"
+    },
+    {
+      "path": "supplementary/unlabeled_columns_a_i.csv",
+      "rows": 2525,
+      "columns": 10,
+      "size_bytes": 149160,
+      "sha256": "fd79c2e13ad8c25f6d070c7e3318a7d2b7d4908c0fdc4120c4d718f111cf3cab"
+    },
+    {
+      "path": "data/history_universe.csv",
+      "rows": 1262,
+      "columns": 2,
+      "size_bytes": 44630,
+      "sha256": "db42bdf673f81f535d0c099c5e36f43e25417de2dc5f5ec7d1966e5e1291ebbf"
+    },
+    {
+      "path": "audit/missing_values.csv",
+      "rows": 127,
+      "columns": 4,
+      "size_bytes": 5878,
+      "sha256": "52e4bb63a92e3ee3908e31b5af4b1771b59a33a369bcc2eb3ff522cc648f4c65"
+    },
+    {
+      "path": "audit/column_mapping.csv",
+      "rows": 49,
+      "columns": 4,
+      "size_bytes": 3467,
+      "sha256": "0d8f49d7584efe2cbca00c55def3825d4d3615fec050eb751ec8cebdda709b6e"
+    }
+  ]
+}

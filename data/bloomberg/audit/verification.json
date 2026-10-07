@@ -1,0 +1,70 @@
+{
+  "history_checks": [
+    {
+      "file": "supplementary/prices_1y.csv.gz",
+      "rows": 366,
+      "columns": 1263,
+      "missing": 147814,
+      "status": "verified"
+    },
+    {
+      "file": "supplementary/volumes_1y.csv.gz",
+      "rows": 366,
+      "columns": 1263,
+      "missing": 147693,
+      "status": "verified"
+    },
+    {
+      "file": "supplementary/prices_3y.csv.gz",
+      "rows": 1097,
+      "columns": 1263,
+      "missing": 452583,
+      "status": "verified"
+    },
+    {
+      "file": "supplementary/prices_5y.csv.gz",
+      "rows": 1827,
+      "columns": 1263,
+      "missing": 763559,
+      "status": "verified"
+    },
+    {
+      "file": "supplementary/volumes_3y.csv.gz",
+      "rows": 1097,
+      "columns": 1263,
+      "missing": 452520,
+      "status": "verified"
+    },
+    {
+      "file": "supplementary/benchmark_5y.csv.gz",
+      "rows": 1827,
+      "columns": 2,
+      "missing": 522,
+      "status": "verified"
+    },
+    {
+      "file": "data/prices_10y.csv.gz",
+      "rows": 3653,
+      "columns": 1263,
+      "missing": 1636079,
+      "status": "verified"
+    },
+    {
+      "file": "data/volumes_10y.csv.gz",
+      "rows": 3653,
+      "columns": 1263,
+      "missing": 1636124,
+      "status": "verified"
+    },
+    {
+      "file": "supplementary/benchmark_10y.csv.gz",
+      "rows": 3653,
+      "columns": 2,
+      "missing": 821,
+      "status": "verified"
+    }
+  ],
+  "master_rows": 10420,
+  "master_joins_verified": true,
+  "derived_ratios_verified": true
+}
