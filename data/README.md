@@ -9,7 +9,9 @@ revenir à la source si un chiffre semble étrange.
 | `interim/` | Les tables importées, encore en cours de vérification |
 | `processed/` | Les tables validées pour les modèles et le backtest |
 
-Tout le contenu de `data/` est ignoré par Git, sauf ce petit guide. Les fichiers
+Les nouveaux exports et résultats locaux dans `data/` sont ignorés par Git.
+Ce guide et les données déjà partagées dans `data/bloomberg/` restent versionnés.
+Les fichiers
 `WLS.xlsm` et `wls.xlsx` restent à la racine, versionnés et inchangés.
 
 ## Les informations à garder avec chaque export

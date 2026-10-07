@@ -22,6 +22,7 @@ Le code, les notebooks utiles, la documentation et les petits jeux de données
 inventés pour les tests. Mets ces jeux de test dans `tests/fixtures/`.
 
 Les Excel déjà présents dans le dépôt restent versionnés et inchangés à la racine.
+Les données partagées dans `data/bloomberg/` restent également versionnées.
 Les prochains exports locaux iront dans `data/raw/` et les résultats générés dans
 `outputs/`. Ces nouveaux fichiers et résultats sont ignorés par Git.
 
@@ -77,6 +78,10 @@ avec Data avant de parler de données validées pour un backtest.
 .\.venv\Scripts\python.exe -m ruff check src tests
 .\.venv\Scripts\python.exe -m ruff format --check src tests
 ```
+
+Les règles Ruff sur les imports et le formatage préservent le module
+`src/covariance.py` déjà fusionné par l’équipe ; ses tests et les autres règles
+de contrôle restent actifs.
 
 Les tests créent de petits classeurs fictifs. L'équipe peut les lancer sans Terminal
 Bloomberg ni export privé. GitHub Actions lance les mêmes contrôles sous Windows

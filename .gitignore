@@ -23,6 +23,7 @@ dist/
 # Bloomberg exports and generated datasets (documentation stays tracked)
 /data/*
 !/data/README.md
+!/data/bloomberg/
 
 # Generated results and temporary work
 /outputs/
