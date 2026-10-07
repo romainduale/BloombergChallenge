@@ -1,0 +1,7 @@
+[
+  {
+    "cell": "K17573",
+    "formula": "_xll.BQL(C2:C1263,\"latest_announcement_dt()\")",
+    "cached_value": "#N/A Invalid Parameter: Error: Undefined item: latest_announcement_dt()."
+  }
+]
