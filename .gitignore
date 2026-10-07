@@ -23,8 +23,6 @@ dist/
 # Bloomberg exports and generated datasets (documentation stays tracked)
 /data/*
 !/data/README.md
-/WLS.xlsm
-/wls.xlsx
 
 # Generated results and temporary work
 /outputs/

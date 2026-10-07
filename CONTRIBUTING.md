@@ -21,9 +21,9 @@ La relecture obligatoire et la protection de la branche principale doivent encor
 Le code, les notebooks utiles, la documentation et les petits jeux de données
 inventés pour les tests. Mets ces jeux de test dans `tests/fixtures/`.
 
-Les exports Bloomberg restent locaux. Les deux fichiers de départ restent pour
-l'instant à la racine ; les prochains iront dans `data/raw/`. Les résultats générés
-vont dans `outputs/`. Ces données et résultats sont ignorés par Git.
+Les Excel déjà présents dans le dépôt restent versionnés et inchangés à la racine.
+Les prochains exports locaux iront dans `data/raw/` et les résultats générés dans
+`outputs/`. Ces nouveaux fichiers et résultats sont ignorés par Git.
 
 Il nous reste à choisir un dossier partagé pour que chacun récupère les mêmes
 exports. Le `.gitignore` évite de les committer, mais ne les partage pas.
@@ -85,6 +85,5 @@ et Linux ; les résultats distants restent à vérifier après publication de la
 ## Partager le nettoyage actuel
 
 Le travail est regroupé sur `data/python-import-wls` pour relecture avant toute
-fusion dans `main`. Les Excel sont retirés du suivi, mais leurs copies locales
-restent intactes. Avant que les autres récupèrent la branche, demande-leur de
-conserver une copie hors du dépôt. Les anciennes versions restent dans l'historique.
+fusion dans `main`. Les Excel restent suivis par Git, avec le même contenu que
+dans `main`, et restent disponibles pour toute l'équipe.

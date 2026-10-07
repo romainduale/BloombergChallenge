@@ -10,7 +10,7 @@ revenir à la source si un chiffre semble étrange.
 | `processed/` | Les tables validées pour les modèles et le backtest |
 
 Tout le contenu de `data/` est ignoré par Git, sauf ce petit guide. Les fichiers
-`WLS.xlsm` et `wls.xlsx` restent pour l'instant à la racine et sont eux aussi ignorés.
+`WLS.xlsm` et `wls.xlsx` restent à la racine, versionnés et inchangés.
 
 ## Les informations à garder avec chaque export
 
