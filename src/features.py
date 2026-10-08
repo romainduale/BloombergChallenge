@@ -5,7 +5,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-
 WEEKS_PER_YEAR = 52
 
 
@@ -95,29 +94,16 @@ def compute_features(
     mom_6m = weekly_prices.pct_change(26, fill_method=None)
 
     # Volatilité annualisée sur les 13 dernières semaines
-    volatility_13w = (
-        weekly_returns
-        .rolling(13, min_periods=13)
-        .std()
-        * np.sqrt(WEEKS_PER_YEAR)
-    )
+    volatility_13w = weekly_returns.rolling(13, min_periods=13).std() * np.sqrt(WEEKS_PER_YEAR)
 
     # Volume anormal :
     # volume de la semaine / volume médian des 13 dernières semaines
-    median_volume_13w = (
-        weekly_volumes
-        .rolling(13, min_periods=13)
-        .median()
-    )
+    median_volume_13w = weekly_volumes.rolling(13, min_periods=13).median()
 
     abnormal_volume_13w = weekly_volumes / median_volume_13w
 
     # Distance au plus haut des 52 dernières semaines
-    rolling_high_52w = (
-        weekly_prices
-        .rolling(52, min_periods=52)
-        .max()
-    )
+    rolling_high_52w = weekly_prices.rolling(52, min_periods=52).max()
 
     distance_52w_high = weekly_prices / rolling_high_52w - 1
 
@@ -144,16 +130,12 @@ def compute_target(
     rendement futur du WLS sur 5 semaines.
     """
 
-    stock_future_return = (
-        weekly_prices
-        .pct_change(horizon_weeks, fill_method=None)
-        .shift(-horizon_weeks)
+    stock_future_return = weekly_prices.pct_change(horizon_weeks, fill_method=None).shift(
+        -horizon_weeks
     )
 
-    benchmark_future_return = (
-        weekly_benchmark
-        .pct_change(horizon_weeks, fill_method=None)
-        .shift(-horizon_weeks)
+    benchmark_future_return = weekly_benchmark.pct_change(horizon_weeks, fill_method=None).shift(
+        -horizon_weeks
     )
 
     excess_return = stock_future_return.sub(
@@ -206,26 +188,15 @@ def build_panel(
         volumes_daily.index.max(),
     )
 
-    days_since_friday = (
-        last_market_date.weekday() - 4
-    ) % 7
+    days_since_friday = (last_market_date.weekday() - 4) % 7
 
-    last_completed_friday = (
-        last_market_date
-        - pd.Timedelta(days=days_since_friday)
-    )
+    last_completed_friday = last_market_date - pd.Timedelta(days=days_since_friday)
 
-    weekly_prices = weekly_prices.loc[
-        weekly_prices.index <= last_completed_friday
-    ]
+    weekly_prices = weekly_prices.loc[weekly_prices.index <= last_completed_friday]
 
-    weekly_volumes = weekly_volumes.loc[
-        weekly_volumes.index <= last_completed_friday
-    ]
+    weekly_volumes = weekly_volumes.loc[weekly_volumes.index <= last_completed_friday]
 
-    weekly_benchmark = weekly_benchmark.loc[
-        weekly_benchmark.index <= last_completed_friday
-    ]
+    weekly_benchmark = weekly_benchmark.loc[weekly_benchmark.index <= last_completed_friday]
 
     # On aligne exactement les mêmes dates / actions
     weekly_volumes = weekly_volumes.reindex(
@@ -246,32 +217,19 @@ def build_panel(
     panel_parts = []
 
     for feature_name, feature_values in raw_features.items():
-
         # Valeur brute
-        raw_long = (
-            feature_values
-            .stack()
-            .rename(feature_name)
-        )
+        raw_long = feature_values.stack().rename(feature_name)
 
         panel_parts.append(raw_long)
 
         # Rang transversal
         ranked = cross_sectional_rank(feature_values)
 
-        ranked_long = (
-            ranked
-            .stack()
-            .rename(f"{feature_name}_rank")
-        )
+        ranked_long = ranked.stack().rename(f"{feature_name}_rank")
 
         panel_parts.append(ranked_long)
 
-    target_long = (
-        target
-        .stack()
-        .rename("future_excess_return_5w")
-    )
+    target_long = target.stack().rename("future_excess_return_5w")
 
     panel_parts.append(target_long)
 
@@ -291,7 +249,6 @@ def build_panel(
 
 
 if __name__ == "__main__":
-
     prices, volumes, benchmark = load_bloomberg_data()
 
     panel = build_panel(
@@ -300,9 +257,7 @@ if __name__ == "__main__":
         benchmark,
     )
 
-    output_path = Path(
-        "data/processed/features_weekly_v1.csv.gz"
-    )
+    output_path = Path("data/processed/features_weekly_v1.csv.gz")
 
     output_path.parent.mkdir(
         parents=True,
@@ -315,12 +270,8 @@ if __name__ == "__main__":
         compression="gzip",
     )
 
-    print(
-        f"Fichier créé : {output_path}"
-    )
+    print(f"Fichier créé : {output_path}")
 
-    print(
-        f"Nombre de lignes : {len(panel):,}"
-    )
+    print(f"Nombre de lignes : {len(panel):,}")
 
     print(panel.head())

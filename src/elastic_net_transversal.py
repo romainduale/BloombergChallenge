@@ -9,7 +9,6 @@ from sklearn.linear_model import ElasticNet
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-
 # ============================================================
 # VARIABLES UTILISÉES PAR LE MODÈLE
 # ============================================================
@@ -89,13 +88,9 @@ def prepare_training_data(
 
     required_columns = FEATURES + [TARGET]
 
-    clean = df.dropna(
-        subset=required_columns
-    ).copy()
+    clean = df.dropna(subset=required_columns).copy()
 
-    clean = clean.sort_values(
-        ["date", "id"]
-    ).reset_index(drop=True)
+    clean = clean.sort_values(["date", "id"]).reset_index(drop=True)
 
     return clean
 
@@ -193,66 +188,40 @@ def walk_forward_backtest(
 
     data = prepare_training_data(df)
 
-    dates = pd.Index(
-        sorted(data["date"].unique())
-    )
+    dates = pd.Index(sorted(data["date"].unique()))
 
     # Il faut assez d'historique avant le premier test.
     first_test_date = (
-        dates.min()
-        + pd.DateOffset(years=cfg.train_years)
-        + pd.Timedelta(weeks=cfg.purge_weeks)
+        dates.min() + pd.DateOffset(years=cfg.train_years) + pd.Timedelta(weeks=cfg.purge_weeks)
     )
 
-    eligible_test_dates = dates[
-        dates >= first_test_date
-    ]
+    eligible_test_dates = dates[dates >= first_test_date]
 
-    test_dates = eligible_test_dates[
-        :: cfg.test_every_n_weeks
-    ]
+    test_dates = eligible_test_dates[:: cfg.test_every_n_weeks]
 
     predictions_list = []
     ic_results = []
 
-    print(
-        f"Nombre de dates de test : {len(test_dates)}"
-    )
+    print(f"Nombre de dates de test : {len(test_dates)}")
 
     for number, test_date in enumerate(
         test_dates,
         start=1,
     ):
-
         test_date = pd.Timestamp(test_date)
 
         # ----------------------------------------------------
         # PURGE
         # ----------------------------------------------------
 
-        train_end = (
-            test_date
-            - pd.Timedelta(
-                weeks=cfg.purge_weeks
-            )
-        )
+        train_end = test_date - pd.Timedelta(weeks=cfg.purge_weeks)
 
         # Fenêtre glissante de 3 ans
-        train_start = (
-            train_end
-            - pd.DateOffset(
-                years=cfg.train_years
-            )
-        )
+        train_start = train_end - pd.DateOffset(years=cfg.train_years)
 
-        train = data[
-            (data["date"] >= train_start)
-            & (data["date"] < train_end)
-        ].copy()
+        train = data[(data["date"] >= train_start) & (data["date"] < train_end)].copy()
 
-        test = data[
-            data["date"] == test_date
-        ].copy()
+        test = data[data["date"] == test_date].copy()
 
         if len(train) < cfg.min_train_rows:
             continue
@@ -286,21 +255,14 @@ def walk_forward_backtest(
         # PRÉDICTION
         # ----------------------------------------------------
 
-        predictions = model.predict(
-            X_test
-        )
+        predictions = model.predict(X_test)
 
-        test["predicted_excess_return"] = (
-            predictions
-        )
+        test["predicted_excess_return"] = predictions
 
         # Classement prédit des actions
-        test["predicted_rank"] = (
-            test["predicted_excess_return"]
-            .rank(
-                pct=True,
-                method="average",
-            )
+        test["predicted_rank"] = test["predicted_excess_return"].rank(
+            pct=True,
+            method="average",
         )
 
         # ----------------------------------------------------
@@ -342,18 +304,14 @@ def walk_forward_backtest(
         )
 
     if not predictions_list:
-        raise ValueError(
-            "Aucune prédiction n'a été produite."
-        )
+        raise ValueError("Aucune prédiction n'a été produite.")
 
     predictions_df = pd.concat(
         predictions_list,
         ignore_index=True,
     )
 
-    ic_df = pd.DataFrame(
-        ic_results
-    )
+    ic_df = pd.DataFrame(ic_results)
 
     return predictions_df, ic_df
 
@@ -372,30 +330,15 @@ def print_summary(
     print("RÉSULTATS ELASTIC NET V1")
     print("=" * 60)
 
-    print(
-        f"Nombre de périodes : "
-        f"{len(valid_ic)}"
-    )
+    print(f"Nombre de périodes : {len(valid_ic)}")
 
-    print(
-        f"IC moyen : "
-        f"{valid_ic.mean():.4f}"
-    )
+    print(f"IC moyen : {valid_ic.mean():.4f}")
 
-    print(
-        f"IC médian : "
-        f"{valid_ic.median():.4f}"
-    )
+    print(f"IC médian : {valid_ic.median():.4f}")
 
-    print(
-        f"% périodes IC positif : "
-        f"{(valid_ic > 0).mean():.1%}"
-    )
+    print(f"% périodes IC positif : {(valid_ic > 0).mean():.1%}")
 
-    print(
-        f"Écart-type IC : "
-        f"{valid_ic.std():.4f}"
-    )
+    print(f"Écart-type IC : {valid_ic.std():.4f}")
 
 
 def fit_latest_ranking(
@@ -413,40 +356,21 @@ def fit_latest_ranking(
 
     cfg = config or ElasticNetConfig()
 
-    feature_data = full_df.dropna(
-        subset=FEATURES
-    ).copy()
+    feature_data = full_df.dropna(subset=FEATURES).copy()
 
-    latest_date = feature_data[
-        "date"
-    ].max()
+    latest_date = feature_data["date"].max()
 
-    latest = feature_data[
-        feature_data["date"] == latest_date
-    ].copy()
+    latest = feature_data[feature_data["date"] == latest_date].copy()
 
     # Pour entraîner le modèle, la target doit être connue.
-    historical = full_df.dropna(
-        subset=FEATURES + [TARGET]
-    ).copy()
+    historical = full_df.dropna(subset=FEATURES + [TARGET]).copy()
 
-    train_end = (
-        latest_date
-        - pd.Timedelta(
-            weeks=cfg.purge_weeks
-        )
-    )
+    train_end = latest_date - pd.Timedelta(weeks=cfg.purge_weeks)
 
-    train_start = (
-        train_end
-        - pd.DateOffset(
-            years=cfg.train_years
-        )
-    )
+    train_start = train_end - pd.DateOffset(years=cfg.train_years)
 
     train = historical[
-        (historical["date"] >= train_start)
-        & (historical["date"] < train_end)
+        (historical["date"] >= train_start) & (historical["date"] < train_end)
     ].copy()
 
     model = make_model(cfg)
@@ -456,18 +380,11 @@ def fit_latest_ranking(
         train[TARGET],
     )
 
-    latest["predicted_excess_return"] = (
-        model.predict(
-            latest[FEATURES]
-        )
-    )
+    latest["predicted_excess_return"] = model.predict(latest[FEATURES])
 
-    latest["predicted_rank"] = (
-        latest["predicted_excess_return"]
-        .rank(
-            ascending=True,
-            pct=True,
-        )
+    latest["predicted_rank"] = latest["predicted_excess_return"].rank(
+        ascending=True,
+        pct=True,
     )
 
     ranking = latest.sort_values(
@@ -486,37 +403,24 @@ def fit_latest_ranking(
 
 
 if __name__ == "__main__":
-
     config = ElasticNetConfig()
 
-    print(
-        "Chargement du panel..."
-    )
+    print("Chargement du panel...")
 
     df = load_panel()
 
-    print(
-        f"{len(df):,} observations chargées."
+    print(f"{len(df):,} observations chargées.")
+
+    print("\nLancement du walk-forward...")
+
+    predictions, ic_results = walk_forward_backtest(
+        df,
+        config=config,
     )
 
-    print(
-        "\nLancement du walk-forward..."
-    )
+    print_summary(ic_results)
 
-    predictions, ic_results = (
-        walk_forward_backtest(
-            df,
-            config=config,
-        )
-    )
-
-    print_summary(
-        ic_results
-    )
-
-    output_dir = Path(
-        "data/processed"
-    )
+    output_dir = Path("data/processed")
 
     output_dir.mkdir(
         parents=True,
@@ -524,15 +428,13 @@ if __name__ == "__main__":
     )
 
     predictions.to_csv(
-        output_dir
-        / "elastic_net_predictions_v1.csv.gz",
+        output_dir / "elastic_net_predictions_v1.csv.gz",
         index=False,
         compression="gzip",
     )
 
     ic_results.to_csv(
-        output_dir
-        / "elastic_net_ic_v1.csv",
+        output_dir / "elastic_net_ic_v1.csv",
         index=False,
     )
 
@@ -546,8 +448,7 @@ if __name__ == "__main__":
     )
 
     latest_ranking.to_csv(
-        output_dir
-        / "latest_elastic_net_ranking_v1.csv",
+        output_dir / "latest_elastic_net_ranking_v1.csv",
         index=False,
     )
 
@@ -556,6 +457,4 @@ if __name__ == "__main__":
     print("TOP 20 ELASTIC NET")
     print("=" * 60)
 
-    print(
-        latest_ranking.head(20)
-    )
+    print(latest_ranking.head(20))
