@@ -44,36 +44,59 @@ Avec w_b le benchmark répliqué, κ le paramètre de robustesse, γ la pénalit
 
 ## Feuille de route
 
-- [ ] Pipeline Elastic Net transversal avec walk-forward purgé
+- [x] Prototype Elastic Net transversal avec walk-forward purgé
+- [x] Prototype tail model et signal combiné
+- [x] Prototype Ledoit-Wolf, filtre de corrélation et allocation long-only
+- [x] Backtests sur cinq offsets et tests placebo du signal
 - [ ] Requêtes BQL (composition historique du WLS, prix hebdomadaires, variables point-in-time)
 - [ ] Panel réel et mesure de l'IC hors échantillon
-- [ ] Module Ledoit-Wolf
-- [ ] Optimiseur robuste (cvxpy)
-- [ ] Backtest sur fenêtres de 5 semaines, commissions incluses
+- [ ] Rendements ajustés dans une devise commune
+- [ ] Optimiseur en poids actifs avec tracking error et turnover
+- [ ] Backtest avec commissions et règles d'exécution du challenge
+- [ ] Couverture de tests des features, modèles, allocation et backtest
 - [ ] Validation avec le Faculty Advisor
 - [ ] Portefeuille initial prêt avant le lancement
+
+Le détail du code réellement implémenté, ainsi que les écarts avec la stratégie
+cible, est tenu dans [`docs/architecture_strategie.md`](docs/architecture_strategie.md).
 
 ## Structure du dépôt
 
 ```
 .
 ├── README.md
-├── data/                          # exports BQL, non versionnés
+├── data/                          # exports partagés et zones de travail locales
 ├── src/
 │   ├── elastic_net_transversal.py # brique 1
 │   ├── covariance.py              # brique 2
-│   ├── optimisation.py            # brique 3
-│   └── backtest.py
-├── notebooks/                     # explorations
+│   ├── robust_optimizer_v1.py      # brique 3
+│   └── backtest_portfolio_v1.py
+├── docs/                          # audits et architecture de la stratégie
 └── tests/                         # tests placebo et contrôles de conformité
 ```
 
 ## Démarrage
 
 ```bash
-pip install numpy pandas scikit-learn cvxpy
-python src/elastic_net_transversal.py   # démonstration sur données synthétiques
+python3.14 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m pytest
 ```
+
+La chaîne de recherche s'exécute ensuite dans cet ordre :
+
+```bash
+.venv/bin/python src/features.py
+.venv/bin/python src/validate_elastic_net.py
+.venv/bin/python src/validate_tail_model.py
+.venv/bin/python src/combined_signal_v1.py
+.venv/bin/python src/risk_screen_v1.py
+.venv/bin/python src/validate_optimizer_v1.py
+.venv/bin/python src/robust_optimizer_v1.py
+.venv/bin/python src/validate_portfolio_offsets.py
+```
+
+Les résultats sont écrits dans `data/processed/` et ne sont pas versionnés.
 
 ## Garde-fous
 

@@ -16,6 +16,35 @@ le format d'un fichier utilisé par les autres, préviens-les avant de coder.
 La relecture obligatoire et la protection de la branche principale doivent encore
 être activées dans les paramètres GitHub.
 
+### Types de branches
+
+| Préfixe | Usage |
+|---|---|
+| `feature/` | Nouvelle capacité de modèle ou de portefeuille |
+| `fix/` | Correction d'un bug ou d'une fuite de données |
+| `data/` | Import, audit ou contrat de données |
+| `research/` | Expérience qui ne modifie pas encore la stratégie de référence |
+| `backtest/` | Moteur, métrique ou contrôle de backtest |
+| `docs/` | Documentation uniquement |
+
+Une branche reste courte et centrée sur un seul objectif. Les expériences utiles
+passent de `research/` vers une PR de production seulement après comparaison à une
+baseline et validation hors échantillon.
+
+### Cycle d'une modification
+
+1. Décrire l'hypothèse, le résultat attendu et le contrôle qui prouvera le succès.
+2. Créer la branche depuis une `main` à jour.
+3. Ajouter le code, les tests et la documentation dans la même PR.
+4. Exécuter les contrôles locaux puis pousser la branche.
+5. Ouvrir une PR avec le modèle fourni dans `.github/pull_request_template.md`.
+6. Corriger la CI et faire relire par au moins une autre personne.
+7. Fusionner par squash, puis supprimer la branche.
+
+Pour `main`, activer dans GitHub : PR obligatoire, une approbation, résolution des
+conversations, contrôles Linux et Windows obligatoires, interdiction des force-push
+et des suppressions. On ne fusionne pas une PR dont la CI est rouge.
+
 ## Ce qu'on garde dans Git
 
 Le code, les notebooks utiles, la documentation et les petits jeux de données
@@ -87,8 +116,13 @@ Les tests créent de petits classeurs fictifs. L'équipe peut les lancer sans Te
 Bloomberg ni export privé. GitHub Actions lance les mêmes contrôles sous Windows
 et Linux ; les résultats distants restent à vérifier après publication de la branche.
 
-## Partager le nettoyage actuel
+Pour un changement quantitatif, la PR précise aussi la date des données, l'univers,
+le benchmark, les devises, les règles d'ajustement, les coûts et la baseline. Un gain
+de backtest sans ces informations n'est pas une preuve suffisante pour modifier la
+stratégie de référence.
 
-Le travail est regroupé sur `data/python-import-wls` pour relecture avant toute
-fusion dans `main`. Les Excel restent suivis par Git, avec le même contenu que
-dans `main`, et restent disponibles pour toute l'équipe.
+## Historique de l'import WLS
+
+Le premier import, initialement développé sur `data/python-import-wls`, est
+désormais fusionné dans `main`. Les Excel restent suivis par Git et inchangés ; les
+nouveaux résultats d'import restent locaux dans `data/interim/` jusqu'à validation.
