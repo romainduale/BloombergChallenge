@@ -2,6 +2,10 @@
 
 Portefeuille quantitatif long-only de 1 M$ sur les actions de l'indice Bloomberg World Large, Mid & Small Cap (WLS).
 
+> **À lire en premier :** [`docs/guide_utilisation_pipeline.md`](docs/guide_utilisation_pipeline.md)
+> explique simplement le fonctionnement complet, les résultats, le tutoriel PyCharm,
+> les fichiers importants et les prochaines améliorations.
+
 ## Objectif
 
 Le classement repose sur le rendement relatif face à l'indice WLS.
@@ -59,8 +63,16 @@ Avec w_b le benchmark répliqué, κ le paramètre de robustesse, γ la pénalit
 - [ ] Validation avec le Faculty Advisor
 - [ ] Portefeuille initial prêt avant le lancement
 
-Le détail du code réellement implémenté, ainsi que les écarts avec la stratégie
-cible, est tenu dans [`docs/architecture_strategie.md`](docs/architecture_strategie.md).
+Documentation du projet :
+
+- [`docs/guide_utilisation_pipeline.md`](docs/guide_utilisation_pipeline.md) : guide
+  simple, résultats et tutoriel ;
+- [`docs/architecture_strategie.md`](docs/architecture_strategie.md) : détail technique
+  et écarts entre la stratégie cible et le code ;
+- [`docs/audit_execution_features.md`](docs/audit_execution_features.md) : audit détaillé
+  du backtest, des stops et des features ;
+- [`docs/audit_donnees.md`](docs/audit_donnees.md) : audit des données Bloomberg ;
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) : branches, pull requests et contrôles.
 
 ## Structure du dépôt
 
