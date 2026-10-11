@@ -13,7 +13,7 @@ Le classement repose sur le rendement relatif face à l'indice WLS.
 
 - Long-only, sans levier, sans ETF
 - Actions membres du WLS uniquement
-- 20 % maximum par position (plafond interne fixé à 18 %)
+- 20 % maximum par position, dans l'optimiseur comme dans la couche d'exécution
 - 1 M$ investi en totalité dès la première semaine
 - Commissions simulées
 
@@ -40,7 +40,7 @@ $$
 \max_{w} \; \hat{\alpha}^{\top}(w - w_b) - \kappa \, \lVert \Omega^{1/2}(w - w_b) \rVert_2 - \gamma \, \lVert w - w_{prec} \rVert_1
 $$
 
-Avec w_b le benchmark répliqué, κ le paramètre de robustesse, γ la pénalité de rotation calée sur les commissions. Contraintes de positivité, somme à 100 %, 18 % par titre et tracking error maximale.
+Avec w_b le benchmark répliqué, κ le paramètre de robustesse, γ la pénalité de rotation calée sur les commissions. Contraintes de positivité, somme à 100 %, 20 % par titre et tracking error maximale.
 
 ## Feuille de route
 
@@ -52,8 +52,10 @@ Avec w_b le benchmark répliqué, κ le paramètre de robustesse, γ la pénalit
 - [ ] Panel réel et mesure de l'IC hors échantillon
 - [ ] Rendements ajustés dans une devise commune
 - [ ] Optimiseur en poids actifs avec tracking error et turnover
-- [ ] Backtest avec commissions et règles d'exécution du challenge
-- [ ] Couverture de tests des features, modèles, allocation et backtest
+- [x] Backtest exploratoire avec coûts, turnover et règles d'exécution paramétrables
+- [x] Ordres d'achat limite, conservation, réduction, vente et stop-loss
+- [x] Audit annuel, focus 2025-2026, drawdowns et biais de données
+- [x] Tests unitaires des nouvelles features et de la couche d'exécution
 - [ ] Validation avec le Faculty Advisor
 - [ ] Portefeuille initial prêt avant le lancement
 
@@ -70,7 +72,10 @@ cible, est tenu dans [`docs/architecture_strategie.md`](docs/architecture_strate
 │   ├── elastic_net_transversal.py # brique 1
 │   ├── covariance.py              # brique 2
 │   ├── robust_optimizer_v1.py      # brique 3
-│   └── backtest_portfolio_v1.py
+│   ├── backtest_portfolio_v1.py
+│   ├── backtest_execution_v2.py    # coûts, turnover, limites et stops
+│   └── build_execution_plan.py     # ordres BUY/HOLD/REDUCE/SELL/SELL_STOP
+├── config/execution_profiles.json  # paramètres de risque et d'exécution
 ├── docs/                          # audits et architecture de la stratégie
 └── tests/                         # tests placebo et contrôles de conformité
 ```
@@ -86,15 +91,27 @@ python3.14 -m venv .venv
 La chaîne de recherche s'exécute ensuite dans cet ordre :
 
 ```bash
-.venv/bin/python src/features.py
-.venv/bin/python src/validate_elastic_net.py
-.venv/bin/python src/validate_tail_model.py
-.venv/bin/python src/combined_signal_v1.py
-.venv/bin/python src/risk_screen_v1.py
-.venv/bin/python src/validate_optimizer_v1.py
-.venv/bin/python src/robust_optimizer_v1.py
-.venv/bin/python src/validate_portfolio_offsets.py
+.venv/bin/python -m src.features
+.venv/bin/python -m src.validate_elastic_net
+.venv/bin/python -m src.validate_tail_model
+.venv/bin/python -m src.combined_signal_v1
+.venv/bin/python -m src.risk_screen_v1
+.venv/bin/python -m src.validate_optimizer_v1
+.venv/bin/python -m src.robust_optimizer_v1
+.venv/bin/python -m src.validate_portfolio_offsets
 ```
+
+La pipeline jusqu'au plan d'ordres s'exécute en une commande :
+
+```bash
+.venv/bin/python -m src.run_pipeline --skip-features
+```
+
+Le profil par défaut n'active pas le stop-loss, car son test historique n'améliore
+pas encore le couple rendement/drawdown. Les variantes restent disponibles dans
+`config/execution_profiles.json`. Voir
+[`docs/audit_execution_features.md`](docs/audit_execution_features.md) pour les
+résultats annuels, le focus 2025-2026 et le test des features candidates.
 
 Les résultats sont écrits dans `data/processed/` et ne sont pas versionnés.
 
