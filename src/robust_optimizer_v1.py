@@ -12,7 +12,7 @@ COVARIANCE_PATH = Path("data/processed/risk_screen/ledoit_wolf_excess_covariance
 
 OUTPUT_DIR = Path("data/processed/portfolio")
 
-MAX_WEIGHT = 0.18
+MAX_WEIGHT = 0.20
 
 # Robustesse :
 # plus KAPPA est élevé,

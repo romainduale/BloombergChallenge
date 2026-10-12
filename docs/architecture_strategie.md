@@ -25,7 +25,7 @@ Elastic Net          Tail model
  top 30 -> covariance Ledoit-Wolf -> filtre de corrélation -> shortlist de 12
               |
               v
- optimisation long-only -> portefeuille -> backtests et validations
+optimisation long-only -> portefeuille -> backtests, audit et plan d'ordres
 ```
 
 ## 1. Données
@@ -91,7 +91,7 @@ dépasse 0,80.
 alpha Elastic Net attendu - 0,15 x risque relatif estimé à 5 semaines
 ```
 
-Les poids sont positifs, totalisent 100 % et sont plafonnés à 18 %. Le score tail
+Les poids sont positifs, totalisent 100 % et sont plafonnés à 20 %. Le score tail
 sert à construire la shortlist ; l'optimiseur utilise ensuite seulement la
 prédiction Elastic Net comme alpha.
 
@@ -108,6 +108,22 @@ prédiction Elastic Net comme alpha.
 - `src/benchmark_signals.py` compare les modèles à des signaux unitaires simples ;
 - `src/compare_weighting_v1.py` compare les résultats d'allocation agrégés.
 
+La couche d'exécution ajoutée autour de cette V1 ne change pas le signal :
+
+- `src/backtest_execution_v2.py` ajoute coûts, turnover et simulations de stops ;
+- `src/audit_backtest.py` produit les résultats annuels, les extrêmes, les drawdowns
+  et le diagnostic des biais ;
+- `src/build_execution_plan.py` transforme la cible en ordres d'achat, conservation,
+  réduction, vente et vente sur stop ;
+- `src/run_pipeline.py` enchaîne le signal, le risque, l'allocation et les ordres ;
+- `src/features_v2.py` et `src/compare_features_v2.py` isolent les essais de nouvelles
+  variables sans modifier la V1.
+
+Les paramètres d'exécution se trouvent dans `config/execution_profiles.json`. Le stop
+reste désactivé par défaut après comparaison historique ; il peut être réactivé via un
+profil pour de nouveaux tests. Les résultats détaillés figurent dans
+`docs/audit_execution_features.md`.
+
 ## Écart avec la stratégie cible du README
 
 La chaîne V1 est un prototype cohérent, mais l'allocation décrite dans le README
@@ -119,9 +135,9 @@ valider :
 3. momentum 12-1, révisions, surprises, valeur et qualité historiques ;
 4. conversion des scores en alpha calibré par l'IC ;
 5. optimisation explicite en poids actifs par rapport aux poids WLS ;
-6. contrainte de tracking error, coûts de transaction et pénalité de turnover ;
-7. cash, arrondis en nombre d'actions et règles exactes du challenge ;
-8. tests unitaires sur les features, la purge, l'optimiseur et le backtest.
+6. contrainte de tracking error et pénalité de turnover dans l'optimiseur ;
+7. règles exactes du challenge et simulation fidèle des ordres limites intraday ;
+8. couverture exhaustive des briques historiques déjà présentes.
 
 Tant que les points 1 et 2 ne sont pas réglés, les métriques historiques doivent
 être présentées comme exploratoires : le biais de survivance et les devises peuvent
