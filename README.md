@@ -60,6 +60,10 @@ Avec w_b le benchmark répliqué, κ le paramètre de robustesse, γ la pénalit
 - [x] Ordres d'achat limite, conservation, réduction, vente et stop-loss
 - [x] Audit annuel, focus 2025-2026, drawdowns et biais de données
 - [x] Tests unitaires des nouvelles features et de la couche d'exécution
+- [x] Template de données et procédure d'import hebdomadaire
+- [x] Backtest à target 1 semaine et comparaison avec l'horizon 5 semaines
+- [x] Allocation 80 % stratégie 5 semaines et 20 % poche opportuniste yfinance
+- [x] Score opportuniste lisible : potentiel, risque, liquidité et justification
 - [ ] Validation avec le Faculty Advisor
 - [ ] Portefeuille initial prêt avant le lancement
 
@@ -86,8 +90,13 @@ Documentation du projet :
 │   ├── robust_optimizer_v1.py      # brique 3
 │   ├── backtest_portfolio_v1.py
 │   ├── backtest_execution_v2.py    # coûts, turnover, limites et stops
+│   ├── backtest_execution_1w.py    # rebalancement chaque semaine
+│   ├── refresh_feature_market_data.py # actualisation contrôlée prix/volumes
+│   ├── weekly_data_update.py       # import du template hebdomadaire
+│   ├── opportunistic_model.py      # score et allocation de la poche de 20 %
 │   └── build_execution_plan.py     # ordres BUY/HOLD/REDUCE/SELL/SELL_STOP
 ├── config/execution_profiles.json  # paramètres de risque et d'exécution
+├── config/portfolio_allocation.json # paramètres de l'allocation 80/20
 ├── docs/                          # audits et architecture de la stratégie
 └── tests/                         # tests placebo et contrôles de conformité
 ```
@@ -118,6 +127,53 @@ La pipeline jusqu'au plan d'ordres s'exécute en une commande :
 ```bash
 .venv/bin/python -m src.run_pipeline --skip-features
 ```
+
+Pour récupérer d'abord les nouveaux prix et volumes nécessaires aux six features
+de l'Elastic Net, puis produire le portefeuille cinq semaines sans stop :
+
+```bash
+.venv/bin/python -m src.run_pipeline --refresh-market-data --profile sans_stop
+```
+
+Le téléchargement Yahoo est contrôlé sur les jours communs avec Bloomberg. Un
+titre dont le mapping ne recoupe pas l'historique est ignoré et signalé dans
+`data/processed/data_refresh/yahoo_feature_refresh.csv`. Le script ne remplace
+jamais le WLS par un proxy : la série du benchmark reste à actualiser depuis
+Bloomberg.
+
+La recherche hebdomadaire et sa comparaison avec la stratégie 5 semaines se lancent
+avec :
+
+```bash
+.venv/bin/python -m src.run_weekly_research
+```
+
+Le template pour les données Bloomberg et les champs non disponibles sur Yahoo se trouve dans
+[`data/templates/weekly_data_template.xlsx`](data/templates/weekly_data_template.xlsx).
+
+Une fois les données Bloomberg importées, la stratégie 80/20 et son plan d'ordres
+se lancent avec :
+
+```bash
+.venv/bin/python -m src.run_pipeline --opportunistic
+```
+
+Ce lancement génère également deux exports simplifiés :
+
+- `data/processed/opportunistic/core_80_clean.csv` pour la poche cœur de 80 % ;
+- `data/processed/opportunistic/opportunistic_20_clean.csv` pour la poche
+  opportuniste de 20 %.
+
+Ils contiennent les titres retenus, leur devise, l'allocation en pourcentage et en
+dollars, les prix locaux et convertis en dollars, le score et la surperformance
+estimée à cinq semaines. Cette estimation est relative au benchmark et ne constitue
+pas une promesse de rendement.
+
+Les 80 % utilisent la stratégie cinq semaines sans stop. Les 20 % restants sont
+répartis sur quatre titres distincts, à 5 % chacun, après un filtre yfinance sur le
+momentum, le risque, le drawdown et la liquidité. Cette poche opportuniste est une
+première règle de sélection : elle doit encore recevoir son propre backtest avant
+d'être considérée comme validée.
 
 Le profil par défaut n'active pas le stop-loss, car son test historique n'améliore
 pas encore le couple rendement/drawdown. Les variantes restent disponibles dans

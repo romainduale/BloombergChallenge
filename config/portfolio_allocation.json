@@ -1,0 +1,11 @@
+{
+  "core_weight": 0.80,
+  "opportunistic_weight": 0.20,
+  "opportunistic_positions": 4,
+  "max_opportunistic_position_weight": 0.05,
+  "max_global_position_weight": 0.20,
+  "candidate_pool_size": 60,
+  "minimum_history_days": 126,
+  "maximum_data_age_days": 5,
+  "minimum_average_dollar_volume_usd": 5000000
+}
