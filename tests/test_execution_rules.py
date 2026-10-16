@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from src.build_execution_plan import load_price_to_usd_rates
 from src.execution_rules import (
     build_execution_orders,
     simulate_limit_buy,
@@ -105,3 +106,56 @@ def test_existing_position_below_protective_stop_becomes_stop_sale():
     assert orders.loc["A", "action"] == "SELL_STOP"
     assert orders.loc["A", "order_type"] == "MARKET_SELL"
     assert orders.loc["A", "trade_weight"] == pytest.approx(-0.10)
+
+
+def test_execution_plan_maps_latest_fx_rate_by_asset(tmp_path):
+    static_path = tmp_path / "static.csv"
+    fx_path = tmp_path / "fx.csv"
+    pd.DataFrame({"id": ["USD_ASSET", "JPY_ASSET"], "currency": ["USD", "JPY"]}).to_csv(
+        static_path, index=False
+    )
+    pd.DataFrame(
+        {
+            "date": ["2026-10-09", "2026-10-12"],
+            "currency": ["JPY", "JPY"],
+            "usd_rate": [0.0066, 0.0067],
+        }
+    ).to_csv(fx_path, index=False)
+
+    rates = load_price_to_usd_rates(
+        pd.Index(["USD_ASSET", "JPY_ASSET"]),
+        pd.Timestamp("2026-10-12"),
+        static_path=static_path,
+        fx_path=fx_path,
+    )
+
+    assert rates["USD_ASSET"] == pytest.approx(1.0)
+    assert rates["JPY_ASSET"] == pytest.approx(0.0067)
+
+
+def test_execution_plan_infers_missing_currency_from_bloomberg_exchange(tmp_path):
+    static_path = tmp_path / "static.csv"
+    fx_path = tmp_path / "fx.csv"
+    pd.DataFrame(
+        {
+            "id": ["AAPL UW Equity", "6981 JT Equity"],
+            "currency": [pd.NA, pd.NA],
+        }
+    ).to_csv(static_path, index=False)
+    pd.DataFrame(
+        {
+            "date": ["2026-10-14", "2026-10-14"],
+            "currency": ["USD", "JPY"],
+            "usd_rate": [1.0, 0.0063],
+        }
+    ).to_csv(fx_path, index=False)
+
+    rates = load_price_to_usd_rates(
+        pd.Index(["AAPL UW Equity", "6981 JT Equity"]),
+        pd.Timestamp("2026-10-14"),
+        static_path=static_path,
+        fx_path=fx_path,
+    )
+
+    assert rates["AAPL UW Equity"] == pytest.approx(1.0)
+    assert rates["6981 JT Equity"] == pytest.approx(0.0063)

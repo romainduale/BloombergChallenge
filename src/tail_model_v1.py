@@ -74,11 +74,11 @@ def make_tail_model() -> Pipeline:
             (
                 "logistic",
                 LogisticRegression(
-                    penalty="l2",
                     C=1.0,
                     solver="lbfgs",
                     max_iter=1000,
                     class_weight=("balanced"),
+                    l1_ratio=0.0,
                 ),
             ),
         ]

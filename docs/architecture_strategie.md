@@ -26,6 +26,8 @@ Elastic Net          Tail model
               |
               v
 optimisation long-only -> portefeuille -> backtests, audit et plan d'ordres
+              |
+              +-> option 80 % cœur + 20 % score opportuniste yfinance
 ```
 
 ## 1. Données
@@ -34,6 +36,11 @@ optimisation long-only -> portefeuille -> backtests, audit et plan d'ordres
 prix et volumes sur dix ans, benchmark, facteurs statiques et fichiers d'audit.
 Les historiques couvrent 1 262 titres, soit 84,17 % du poids du WLS au snapshot,
 alors que l'univers statique contient 10 420 titres.
+
+`src.refresh_feature_market_data` prolonge uniquement les prix et volumes nécessaires
+aux features actives. Les nouveaux symboles sont contrôlés sur une période de
+chevauchement avec Bloomberg avant import. Le WLS n'est pas remplacé par un indice
+proxy ; les calculs de risque s'arrêtent à la dernière date commune disponible.
 
 `src/import_wls.py` traite séparément le classeur historique `wls.xlsx`. Il
 préserve les valeurs brutes, refuse les schémas ambigus et produit un snapshot,
@@ -94,6 +101,26 @@ alpha Elastic Net attendu - 0,15 x risque relatif estimé à 5 semaines
 Les poids sont positifs, totalisent 100 % et sont plafonnés à 20 %. Le score tail
 sert à construire la shortlist ; l'optimiseur utilise ensuite seulement la
 prédiction Elastic Net comme alpha.
+
+`src/opportunistic_model.py` peut ensuite ramener ces poids à 80 % et réserver 20 %
+à quatre titres absents du portefeuille cœur. Il classe ces candidats avec des
+données yfinance récentes : momentum, volatilité, drawdown, liquidité en USD et,
+quand elle existe, cible moyenne des analystes. Cette couche est explicable mais
+n'a pas encore été backtestée ; elle reste séparée du modèle principal.
+
+## Configuration finale du challenge
+
+La V1 à cinq semaines reste la référence historique. La stratégie exécutable finale
+se trouve dans `src/strategies/final_four_week/` : elle recalcule la cible, la purge,
+les modèles et le risque sur quatre semaines. Le signal attendu du 16 octobre 2026
+arrive ainsi au 13 novembre 2026. La poche opportuniste conserve exactement la
+configuration de `config/portfolio_allocation.json` et les fonctions de scoring
+existantes.
+
+L'export final ajoute, par titre, les scores bruts et les rangs Elastic Net/Tail,
+les valeurs des features, les bêta standardisés des deux modèles et les contributions
+`feature standardisée × bêta`. Les contributions expliquent le sens et l'amplitude
+de l'effet de chaque variable sur le choix du titre.
 
 ## 5. Backtests et validations
 

@@ -1,0 +1,29 @@
+{
+  "prudent": {
+    "tail_weight": 0.50,
+    "elastic_weight": 0.50,
+    "kappa": 0.30,
+    "max_correlation": 0.65,
+    "max_position_weight": 0.12,
+    "top_n": 50,
+    "shortlist_size": 15
+  },
+  "intermediaire": {
+    "tail_weight": 0.65,
+    "elastic_weight": 0.35,
+    "kappa": 0.20,
+    "max_correlation": 0.75,
+    "max_position_weight": 0.15,
+    "top_n": 40,
+    "shortlist_size": 14
+  },
+  "agressif": {
+    "tail_weight": 0.75,
+    "elastic_weight": 0.25,
+    "kappa": 0.15,
+    "max_correlation": 0.80,
+    "max_position_weight": 0.20,
+    "top_n": 30,
+    "shortlist_size": 12
+  }
+}

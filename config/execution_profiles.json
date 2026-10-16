@@ -1,8 +1,8 @@
 {
   "sans_stop": {
     "max_position_weight": 0.20,
-    "commission_bps": 10.0,
-    "slippage_bps": 5.0,
+    "commission_bps": 0,
+    "slippage_bps": 0,
     "minimum_trade_weight": 0.005,
     "limit_discount_pct": 0.005,
     "limit_valid_days": 3,
@@ -16,8 +16,8 @@
   },
   "stop_fixe": {
     "max_position_weight": 0.20,
-    "commission_bps": 10.0,
-    "slippage_bps": 5.0,
+    "commission_bps": 0,
+    "slippage_bps": 0,
     "minimum_trade_weight": 0.005,
     "limit_discount_pct": 0.005,
     "limit_valid_days": 3,
@@ -31,8 +31,8 @@
   },
   "prudent": {
     "max_position_weight": 0.20,
-    "commission_bps": 10.0,
-    "slippage_bps": 5.0,
+    "commission_bps": 0,
+    "slippage_bps": 0,
     "minimum_trade_weight": 0.005,
     "limit_discount_pct": 0.0075,
     "limit_valid_days": 2,
@@ -46,8 +46,8 @@
   },
   "equilibre": {
     "max_position_weight": 0.20,
-    "commission_bps": 10.0,
-    "slippage_bps": 5.0,
+    "commission_bps": 0,
+    "slippage_bps": 0,
     "minimum_trade_weight": 0.005,
     "limit_discount_pct": 0.005,
     "limit_valid_days": 3,
@@ -61,8 +61,8 @@
   },
   "dynamique": {
     "max_position_weight": 0.20,
-    "commission_bps": 8.0,
-    "slippage_bps": 7.0,
+    "commission_bps": 0,
+    "slippage_bps": 0,
     "minimum_trade_weight": 0.010,
     "limit_discount_pct": 0.0025,
     "limit_valid_days": 1,

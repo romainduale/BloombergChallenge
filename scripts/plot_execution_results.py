@@ -1,63 +1,59 @@
-from pathlib import Path
-import pandas as pd
+from __future__ import annotations
+
 import matplotlib.pyplot as plt
+import pandas as pd
+from plot_strategy_helpers import COMPARISON_PATH, require_file
 
-base = Path("data/processed/execution_backtest/profile_comparison")
+require_file(COMPARISON_PATH, ".venv/bin/python -m src.run_weekly_research")
+comparison = pd.read_csv(COMPARISON_PATH).sort_values("horizon_weeks")
+labels = comparison["horizon_weeks"].map(
+    {1: "1 semaine\nrebalancée", 5: "5 semaines\nsans stop"}
+)
+colors = ["#ED7D31", "#1F4E78"]
 
-print("Fichiers disponibles :")
-for p in base.iterdir():
-    print(" -", p.name)
 
-csv_files = list(base.glob("*.csv"))
+def plot_metric(column: str, title: str, ylabel: str, *, percentage: bool = True) -> None:
+    values = comparison[column].astype(float)
+    displayed = 100.0 * values if percentage else values
+    figure, axis = plt.subplots(figsize=(8, 5))
+    bars = axis.bar(labels, displayed, color=colors)
+    axis.axhline(0, color="#555555", linewidth=1)
+    axis.set_title(title)
+    axis.set_ylabel(ylabel)
+    axis.grid(axis="y", alpha=0.25)
+    axis.bar_label(
+        bars,
+        labels=[f"{value:.2f}%" if percentage else f"{value:.2f}" for value in displayed],
+        padding=4,
+    )
+    figure.tight_layout()
+    plt.show()
 
-if not csv_files:
-    raise FileNotFoundError("Aucun CSV trouvé dans profile_comparison")
 
-csv_path = csv_files[0]
-
-print(f"\nLecture de : {csv_path}")
-
-df = pd.read_csv(csv_path)
-
-labels = {
-    "sans_stop": "Sans stop",
-    "stop_fixe": "Stop fixe",
-    "equilibre": "Stop volatilité"
-}
-
-df["label"] = df["profile"].map(labels)
-
-plt.figure(figsize=(8, 5))
-plt.bar(df["label"], 100 * df["mean_net_excess_5w"])
-plt.axhline(0, linewidth=1)
-plt.ylabel("Excès net moyen à 5 semaines (%)")
-plt.title("Performance des profils d'exécution")
-plt.grid(axis="y", alpha=0.3)
-plt.tight_layout()
-plt.show()
-
-plt.figure(figsize=(8, 5))
-plt.bar(df["label"], 100 * df["win_rate"])
-plt.axhline(50, linestyle="--", label="50 %")
-plt.ylabel("Taux de victoire (%)")
-plt.title("Taux de victoire")
-plt.legend()
-plt.grid(axis="y", alpha=0.3)
-plt.tight_layout()
-plt.show()
-
-plt.figure(figsize=(8, 5))
-plt.bar(df["label"], 100 * df["mean_one_way_turnover"])
-plt.ylabel("Turnover one-way moyen (%)")
-plt.title("Turnover par profil")
-plt.grid(axis="y", alpha=0.3)
-plt.tight_layout()
-plt.show()
-
-plt.figure(figsize=(8, 5))
-plt.bar(df["label"], 100 * df["worst_max_drawdown_by_offset"])
-plt.ylabel("Pire drawdown (%)")
-plt.title("Pire drawdown par profil")
-plt.grid(axis="y", alpha=0.3)
-plt.tight_layout()
-plt.show()
+plot_metric(
+    "equivalent_relative_return_5w",
+    "Surperformance nette équivalente sur 5 semaines",
+    "Surperformance relative (%)",
+)
+plot_metric("win_rate", "Taux de victoire", "Périodes positives (%)")
+plot_metric(
+    "annualized_one_way_turnover",
+    "Turnover one-way annualisé",
+    "Turnover annualisé (%)",
+)
+plot_metric(
+    "annualized_cost_linear",
+    "Coûts de transaction annualisés indicatifs",
+    "Coûts annualisés (%)",
+)
+plot_metric(
+    "worst_max_drawdown_by_path",
+    "Pire drawdown historique",
+    "Drawdown (%)",
+)
+plot_metric(
+    "information_ratio",
+    "Information ratio annualisé",
+    "Information ratio",
+    percentage=False,
+)

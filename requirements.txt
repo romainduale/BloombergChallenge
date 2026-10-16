@@ -1,9 +1,11 @@
 # Versions communes, y compris les dépendances indirectes.
 -c requirements-lock.txt
 pandas
+matplotlib
 openpyxl
 pyarrow
 pytest
 ruff
 scikit-learn
+yfinance
 lxml

@@ -7,9 +7,12 @@ import numpy as np
 import pandas as pd
 
 from src.execution_rules import build_execution_orders
+from src.market_metadata import infer_currency
 from src.trading_config import load_execution_profile
 
 PRICES_PATH = Path("data/bloomberg/data/prices_10y.csv.gz")
+STATIC_PATH = Path("data/bloomberg/data/static.csv")
+FX_PATH = Path("data/bloomberg/data/fx_rates.csv")
 PORTFOLIO_PATH = Path("data/processed/portfolio/portfolio_robust_v1.csv")
 OUTPUT_PATH = Path("data/processed/execution/execution_orders.csv")
 
@@ -25,6 +28,51 @@ def load_current_positions(path: Path | None) -> pd.DataFrame:
     if "entry_price" not in positions:
         positions["entry_price"] = np.nan
     return positions[["id", "weight", "entry_price"]]
+
+
+def load_price_to_usd_rates(
+    assets: pd.Index,
+    as_of: pd.Timestamp,
+    *,
+    static_path: Path = STATIC_PATH,
+    fx_path: Path = FX_PATH,
+) -> pd.Series:
+    rates = pd.Series(np.nan, index=assets, dtype=float)
+    if not static_path.exists() or not fx_path.exists():
+        return rates
+
+    static = pd.read_csv(static_path)
+    fx = pd.read_csv(fx_path, parse_dates=["date"])
+    if "id" not in static.columns:
+        return rates
+    if not {"date", "currency", "usd_rate"}.issubset(fx.columns):
+        return rates
+
+    fx = fx[fx["date"] <= as_of].copy()
+    fx["currency"] = fx["currency"].astype(str).str.upper()
+    fx["usd_rate"] = pd.to_numeric(fx["usd_rate"], errors="coerce")
+    latest_fx = fx.sort_values("date").drop_duplicates("currency", keep="last")
+    currency_rates = latest_fx.set_index("currency")["usd_rate"]
+    currency_rates.loc["USD"] = 1.0
+
+    currency_by_asset = pd.Series(index=assets, dtype="string")
+    if "currency" in static.columns:
+        provided = (
+            static.drop_duplicates("id", keep="last")
+            .set_index("id")["currency"]
+            .astype("string")
+            .str.strip()
+            .str.upper()
+            .replace("", pd.NA)
+        )
+        currency_by_asset = provided.reindex(assets)
+    inferred = pd.Series(
+        {asset: infer_currency(asset) for asset in assets},
+        dtype="string",
+    )
+    currency_by_asset = currency_by_asset.fillna(inferred)
+    mapped = currency_by_asset.map(currency_rates)
+    return mapped.astype(float)
 
 
 def build_plan(
@@ -64,6 +112,7 @@ def build_plan(
         .std()
         .iloc[-1]
     )
+    price_to_usd_rates = load_price_to_usd_rates(assets, as_of)
 
     orders = build_execution_orders(
         target,
@@ -74,6 +123,7 @@ def build_plan(
         capital=capital,
         entry_prices=entries,
         daily_volatilities=daily_volatilities,
+        price_to_usd_rates=price_to_usd_rates,
     )
     orders.insert(0, "as_of", as_of)
     orders.insert(1, "profile", profile)

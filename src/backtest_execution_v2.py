@@ -29,11 +29,15 @@ PANEL_V2_PATH = Path("data/processed/features_weekly_v2.csv.gz")
 OUTPUT_DIR = Path("data/processed/execution_backtest")
 
 
-def prepare_data(panel: pd.DataFrame, features: list[str]) -> pd.DataFrame:
-    data = panel.dropna(subset=features + [TARGET]).copy()
+def prepare_data(
+    panel: pd.DataFrame,
+    features: list[str],
+    target_column: str = TARGET,
+) -> pd.DataFrame:
+    data = panel.dropna(subset=features + [target_column]).copy()
     data["date"] = pd.to_datetime(data["date"])
-    threshold = data.groupby("date")[TARGET].transform(lambda values: values.quantile(0.90))
-    data["tail_target"] = data[TARGET].ge(threshold).astype(int)
+    threshold = data.groupby("date")[target_column].transform(lambda values: values.quantile(0.90))
+    data["tail_target"] = data[target_column].ge(threshold).astype(int)
     return data
 
 
@@ -74,6 +78,16 @@ def run_offset(
     daily_prices: pd.DataFrame,
     weekly_prices: pd.DataFrame,
     weekly_benchmark: pd.Series,
+    *,
+    target_column: str = TARGET,
+    horizon_weeks: int = 5,
+    tail_weight: float = 0.75,
+    elastic_weight: float = 0.25,
+    top_n: int = TOP_N,
+    shortlist_size: int = 12,
+    max_correlation: float = 0.80,
+    kappa: float = 0.15,
+    max_position_weight: float = 0.20,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     period_rows = []
     holding_rows = []
@@ -90,14 +104,16 @@ def run_offset(
 
         elastic = make_elastic_model(model_config)
         tail = make_tail_model()
-        elastic.fit(train[features], train[TARGET])
+        elastic.fit(train[features], train[target_column])
         tail.fit(train[features], train["tail_target"])
         test["elastic_prediction"] = elastic.predict(test[features])
         test["tail_score"] = tail.predict_proba(test[features])[:, 1]
         test["elastic_rank"] = test["elastic_prediction"].rank(pct=True)
         test["tail_rank"] = test["tail_score"].rank(pct=True)
-        test["combined_score"] = 0.75 * test["tail_rank"] + 0.25 * test["elastic_rank"]
-        ranking = test.sort_values("combined_score", ascending=False).head(TOP_N).copy()
+        test["combined_score"] = (
+            tail_weight * test["tail_rank"] + elastic_weight * test["elastic_rank"]
+        )
+        ranking = test.sort_values("combined_score", ascending=False).head(top_n).copy()
 
         try:
             covariance = estimate_historical_risk(
@@ -109,17 +125,33 @@ def run_offset(
         except ValueError:
             continue
 
-        shortlist = build_shortlist(ranking, covariance)
-        if len(shortlist) < 6:
+        shortlist = build_shortlist(
+            ranking,
+            covariance,
+            max_correlation=max_correlation,
+            shortlist_size=shortlist_size,
+        )
+        minimum_assets = int(np.ceil(1.0 / max_position_weight))
+        if len(shortlist) < max(6, minimum_assets):
             continue
 
-        weights = optimise(shortlist, covariance)
+        weights = optimise(
+            shortlist,
+            covariance,
+            horizon_weeks=horizon_weeks,
+            kappa=kappa,
+            max_weight=max_position_weight,
+        )
         target_weights = pd.Series(weights, index=shortlist["id"], dtype=float)
         if target_weights.max() > execution_config.max_position_weight + 1e-8:
             raise RuntimeError("L'optimiseur a dépassé le plafond de poids configuré.")
 
-        end_date = _period_end(test_date, weekly_benchmark)
-        benchmark_return = benchmark_future_return(test_date, weekly_benchmark)
+        end_date = _period_end(test_date, weekly_benchmark, horizon_weeks=horizon_weeks)
+        benchmark_return = benchmark_future_return(
+            test_date,
+            weekly_benchmark,
+            horizon_weeks=horizon_weeks,
+        )
         if end_date is None or np.isnan(benchmark_return):
             continue
 
@@ -201,11 +233,11 @@ def run_offset(
                 "offset": offset,
                 "date": test_date,
                 "end_date": end_date,
-                "gross_return_5w": gross_return,
-                "net_return_5w": net_return,
-                "benchmark_return_5w": benchmark_return,
-                "gross_excess_5w": gross_return - benchmark_return,
-                "net_excess_5w": net_return - benchmark_return,
+                f"gross_return_{horizon_weeks}w": gross_return,
+                f"net_return_{horizon_weeks}w": net_return,
+                f"benchmark_return_{horizon_weeks}w": benchmark_return,
+                f"gross_excess_{horizon_weeks}w": gross_return - benchmark_return,
+                f"net_excess_{horizon_weeks}w": net_return - benchmark_return,
                 "one_way_turnover": turnover.one_way_turnover,
                 "traded_notional": turnover.traded_notional,
                 "rebalance_cost_return": turnover.transaction_cost_return,
@@ -240,9 +272,19 @@ def run_backtest(
     features: list[str],
     execution_config: ExecutionConfig,
     model_config: ElasticNetConfig | None = None,
+    *,
+    target_column: str = TARGET,
+    horizon_weeks: int = 5,
+    tail_weight: float = 0.75,
+    elastic_weight: float = 0.25,
+    top_n: int = TOP_N,
+    shortlist_size: int = 12,
+    max_correlation: float = 0.80,
+    kappa: float = 0.15,
+    max_position_weight: float = 0.20,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     cfg = model_config or ElasticNetConfig()
-    data = prepare_data(panel, features)
+    data = prepare_data(panel, features, target_column=target_column)
     daily_prices = pd.read_csv(PRICES_PATH, parse_dates=["date"]).set_index("date").sort_index()
     weekly_prices, weekly_benchmark = load_market_history()
 
@@ -258,6 +300,15 @@ def run_backtest(
             daily_prices,
             weekly_prices,
             weekly_benchmark,
+            target_column=target_column,
+            horizon_weeks=horizon_weeks,
+            tail_weight=tail_weight,
+            elastic_weight=elastic_weight,
+            top_n=top_n,
+            shortlist_size=shortlist_size,
+            max_correlation=max_correlation,
+            kappa=kappa,
+            max_position_weight=max_position_weight,
         )
         periods.append(result)
         holdings.append(positions)
