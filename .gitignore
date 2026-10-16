@@ -24,6 +24,8 @@ dist/
 /data/*
 !/data/README.md
 !/data/bloomberg/
+!/data/templates/
+!/data/templates/weekly_data_template.xlsx
 
 # Generated results and temporary work
 /outputs/

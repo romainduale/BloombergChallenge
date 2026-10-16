@@ -215,6 +215,9 @@ def estimate_historical_risk(
 def build_shortlist(
     ranking: pd.DataFrame,
     covariance: pd.DataFrame,
+    *,
+    max_correlation: float = MAX_CORRELATION,
+    shortlist_size: int = SHORTLIST_SIZE,
 ) -> pd.DataFrame:
     correlation = covariance_to_correlation(covariance)
 
@@ -238,31 +241,35 @@ def build_shortlist(
                 .max()
             )
 
-            accepted = maximum <= MAX_CORRELATION
+            accepted = maximum <= max_correlation
 
         if accepted:
             selected.append(asset)
 
-        if len(selected) >= SHORTLIST_SIZE:
+        if len(selected) >= shortlist_size:
             break
 
-    return ranking[ranking["id"].isin(selected)].copy().head(SHORTLIST_SIZE)
+    return ranking[ranking["id"].isin(selected)].copy().head(shortlist_size)
 
 
 def optimise(
     shortlist: pd.DataFrame,
     covariance: pd.DataFrame,
+    horizon_weeks: int = HORIZON_WEEKS,
+    *,
+    kappa: float = KAPPA,
+    max_weight: float = MAX_WEIGHT,
 ) -> np.ndarray:
     assets = shortlist["id"].tolist()
 
     alpha = shortlist["elastic_prediction"].to_numpy(dtype=float)
 
-    covariance_5w = (
+    covariance_horizon = (
         covariance.loc[
             assets,
             assets,
         ].to_numpy(dtype=float)
-        * HORIZON_WEEKS
+        * horizon_weeks
     )
 
     n_assets = len(assets)
@@ -279,10 +286,10 @@ def optimise(
 
         risk = portfolio_risk(
             weights,
-            covariance_5w,
+            covariance_horizon,
         )
 
-        return -(expected_alpha - KAPPA * risk)
+        return -(expected_alpha - kappa * risk)
 
     result = minimize(
         objective,
@@ -291,7 +298,7 @@ def optimise(
         bounds=[
             (
                 0.0,
-                MAX_WEIGHT,
+                max_weight,
             )
             for _ in range(n_assets)
         ],
@@ -316,6 +323,7 @@ def optimise(
 def benchmark_future_return(
     date: pd.Timestamp,
     weekly_benchmark: pd.Series,
+    horizon_weeks: int = HORIZON_WEEKS,
 ) -> float:
     dates = weekly_benchmark.index
 
@@ -324,7 +332,7 @@ def benchmark_future_return(
 
     location = dates.get_loc(date)
 
-    future_location = location + HORIZON_WEEKS
+    future_location = location + horizon_weeks
 
     if future_location >= len(dates):
         return np.nan

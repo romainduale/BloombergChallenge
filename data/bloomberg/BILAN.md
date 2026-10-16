@@ -4,8 +4,8 @@ Snapshot : 7 octobre 2026. Univers : **10 420 titres**. Historiques : **1 262 ti
 
 | Donnée | Présence et couverture |
 |---|---|
-| Prix 10Y | 1 262 titres, 3 653 dates calendaires ; valeurs manquantes conservées |
-| Volumes 10Y | Même sous-univers et dates |
+| Prix 10Y | 1 262 titres, 3 659 dates ; 1 186 titres prolongés par Yahoo jusqu'au 14/10/2026 |
+| Volumes 10Y | Même sous-univers, même extension contrôlée et valeurs manquantes conservées |
 | WLS benchmark 10Y | Présent ; 2 832 observations non manquantes dans le principal |
 | MOM 1M / 3M / 6M | 7 820 / 10 420 ; 10 401 / 10 420 ; 9 562 / 10 420 |
 | EPS estimé actuel / -1M / -3M | 8 861 / 10 420 ; 8 847 / 10 420 ; 8 834 / 10 420 |
@@ -23,6 +23,10 @@ Les colonnes sans en-tête sont préservées dans le dossier supplementary, avec
 Écarts entre MOM et RMOM : 119 valeurs 1M et 119 valeurs 3M. Les fichiers restent séparés et le master prend MOM. Le fichier audit/momentum_conflicts.csv détaille les écarts.
 
 Les deux benchmark diffèrent seulement au 07/10/2026 (2 575,81 contre 2 576,08). Les deux valeurs sont conservées, car les heures de capture ne sont pas connues.
+
+L'extension Yahoo ne modifie aucune valeur historique au 7 octobre 2026 ou avant.
+Elle représente 97,6 % du poids du sous-univers historique et 82,1 % du poids WLS.
+Le benchmark WLS n'est pas prolongé par un proxy et reste arrêté au 7 octobre.
 
 Nettoyage vérifié : unicité des clés, jointures des 10 420 titres, ratio dette/actifs, ratio de breadth, lecture de tous les CSV historiques, dimensions, ordre des dates, valeurs manquantes et valeurs non positives. Aucun remplacement de données manquantes par zéro.
 

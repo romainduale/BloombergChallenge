@@ -40,6 +40,4 @@ def test_clean_exports_split_sleeves_and_recalculate_readable_values():
     assert opportunistic["id"].tolist() == ["OPP UW Equity"]
     assert opportunistic.loc[0, "allocation_pct"] == pytest.approx(20.0)
     assert opportunistic.loc[0, "score"] == pytest.approx(75.0)
-    assert opportunistic.loc[0, "estimated_excess_profit_5w_usd"] == pytest.approx(
-        8_000.0
-    )
+    assert opportunistic.loc[0, "estimated_excess_profit_5w_usd"] == pytest.approx(8_000.0)

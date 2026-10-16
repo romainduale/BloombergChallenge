@@ -27,12 +27,15 @@ Trois briques, chacune avec un rôle unique.
 
 | Brique | Méthode | Rôle |
 |---|---|---|
-| 1. Rendements | Elastic Net en coupe transversale | Classer les titres selon leur rendement relatif attendu à 5 semaines |
+| 1. Rendements | Elastic Net en coupe transversale | Classer les titres selon leur rendement relatif attendu à 4 semaines pour le cœur final |
 | 2. Covariance | Shrinkage de Ledoit-Wolf | Estimer un risque stable sur 200 à 500 titres |
 | 3. Allocation | Optimisation robuste en poids actifs | Transformer prévisions et risque en poids, sous contraintes |
 
 **Brique 1 · Elastic Net**
-Un modèle commun à tous les titres, estimé sur un panel titre × semaine. Variables transformées en rangs par date (momentum 12-1, retour à la moyenne 1 mois, révisions d'analystes, surprises de résultats, volatilité, valeur, qualité). Validation walk-forward avec purge de 5 semaines. Les scores sont convertis en alphas par la formule de Grinold, α = IC × σ × z.
+Un modèle commun à tous les titres, estimé sur un panel titre × semaine. La
+configuration finale utilise une cible et une purge de 4 semaines afin d'aligner le
+signal du 16 octobre 2026 sur la fin du challenge, le 13 novembre 2026. Les variantes
+historiques à 1 et 5 semaines restent disponibles dans `src/strategies/`.
 
 **Brique 2 · Ledoit-Wolf**
 Covariance estimée sur un an de rendements en USD, utilisée pour mesurer la tracking error face à l'indice.
@@ -62,13 +65,17 @@ Avec w_b le benchmark répliqué, κ le paramètre de robustesse, γ la pénalit
 - [x] Tests unitaires des nouvelles features et de la couche d'exécution
 - [x] Template de données et procédure d'import hebdomadaire
 - [x] Backtest à target 1 semaine et comparaison avec l'horizon 5 semaines
-- [x] Allocation 80 % stratégie 5 semaines et 20 % poche opportuniste yfinance
+- [x] Allocation finale 80 % stratégie 4 semaines et 20 % poche opportuniste inchangée
+- [x] Export des scores Elastic Net/Tail, bêta et contributions par feature
 - [x] Score opportuniste lisible : potentiel, risque, liquidité et justification
 - [ ] Validation avec le Faculty Advisor
 - [ ] Portefeuille initial prêt avant le lancement
 
 Documentation du projet :
 
+- [`docs/guide_pipeline_finale_4_semaines.md`](docs/guide_pipeline_finale_4_semaines.md) :
+  lancement de la pipeline finale, comparaison et réglage des profils prudent,
+  intermédiaire et agressif ;
 - [`docs/guide_utilisation_pipeline.md`](docs/guide_utilisation_pipeline.md) : guide
   simple, résultats et tutoriel ;
 - [`docs/architecture_strategie.md`](docs/architecture_strategie.md) : détail technique
@@ -94,7 +101,11 @@ Documentation du projet :
 │   ├── refresh_feature_market_data.py # actualisation contrôlée prix/volumes
 │   ├── weekly_data_update.py       # import du template hebdomadaire
 │   ├── opportunistic_model.py      # score et allocation de la poche de 20 %
-│   └── build_execution_plan.py     # ordres BUY/HOLD/REDUCE/SELL/SELL_STOP
+│   ├── build_execution_plan.py     # ordres BUY/HOLD/REDUCE/SELL/SELL_STOP
+│   └── strategies/                 # une stratégie testée par dossier
+│       ├── one_week/
+│       ├── five_week/
+│       └── final_four_week/        # pipeline finale 80/20 et CSV explicable
 ├── config/execution_profiles.json  # paramètres de risque et d'exécution
 ├── config/portfolio_allocation.json # paramètres de l'allocation 80/20
 ├── docs/                          # audits et architecture de la stratégie
@@ -127,6 +138,31 @@ La pipeline jusqu'au plan d'ordres s'exécute en une commande :
 ```bash
 .venv/bin/python -m src.run_pipeline --skip-features
 ```
+
+La pipeline finale du challenge, à lancer après la clôture du vendredi 16 octobre,
+est :
+
+```bash
+.venv/bin/python -m src.strategies.final_four_week.pipeline \
+  --refresh-market-data \
+  --data-end 2026-10-16 \
+  --require-signal-date 2026-10-16
+```
+
+Elle produit
+`data/processed/strategies/final_four_week/final_allocation_explained.csv`. Ce fichier
+contient les scores Elastic Net et Tail, les rangs, les valeurs des six features, les
+bêta standardisés et la contribution de chaque feature à chaque score.
+
+Pour comparer les profils prudent, intermédiaire et agressif avec les mêmes périodes
+walk-forward :
+
+```bash
+.venv/bin/python -m src.strategies.final_four_week.compare_profiles
+```
+
+Les paramètres sont centralisés dans `config/final_strategy_profiles.json` et les
+résultats dans `data/processed/strategies/profile_comparison/`.
 
 Pour récupérer d'abord les nouveaux prix et volumes nécessaires aux six features
 de l'Elastic Net, puis produire le portefeuille cinq semaines sans stop :
@@ -169,11 +205,12 @@ dollars, les prix locaux et convertis en dollars, le score et la surperformance
 estimée à cinq semaines. Cette estimation est relative au benchmark et ne constitue
 pas une promesse de rendement.
 
-Les 80 % utilisent la stratégie cinq semaines sans stop. Les 20 % restants sont
+Dans la pipeline finale, les 80 % utilisent la stratégie quatre semaines sans stop.
+Les 20 % restants sont
 répartis sur quatre titres distincts, à 5 % chacun, après un filtre yfinance sur le
 momentum, le risque, le drawdown et la liquidité. Cette poche opportuniste est une
-première règle de sélection : elle doit encore recevoir son propre backtest avant
-d'être considérée comme validée.
+première règle de sélection : ses règles et sa configuration n'ont pas été modifiées
+pour le passage du cœur de 5 à 4 semaines.
 
 Le profil par défaut n'active pas le stop-loss, car son test historique n'améliore
 pas encore le couple rendement/drawdown. Les variantes restent disponibles dans

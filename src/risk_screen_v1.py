@@ -89,11 +89,16 @@ def build_excess_returns(
 
     signal_date = pd.Timestamp(candidates["date"].max())
 
+    benchmark_cutoff = benchmark.loc[:signal_date].last_valid_index()
+    if benchmark_cutoff is None:
+        raise ValueError("Le benchmark WLS ne contient aucune observation avant le signal.")
+    common_cutoff = min(signal_date, pd.Timestamp(benchmark_cutoff))
+
     ids = [asset for asset in candidates["id"] if asset in prices.columns]
 
     weekly_prices = (
         prices.loc[
-            :signal_date,
+            :common_cutoff,
             ids,
         ]
         .resample("W-FRI")
@@ -101,7 +106,9 @@ def build_excess_returns(
         .tail(LOOKBACK_WEEKS + 1)
     )
 
-    weekly_benchmark = benchmark.loc[:signal_date].resample("W-FRI").last().tail(LOOKBACK_WEEKS + 1)
+    weekly_benchmark = (
+        benchmark.loc[:common_cutoff].resample("W-FRI").last().tail(LOOKBACK_WEEKS + 1)
+    )
 
     stock_returns = weekly_prices.pct_change(fill_method=None)
 

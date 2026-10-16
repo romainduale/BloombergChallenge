@@ -79,9 +79,7 @@ def test_opportunity_scores_and_combined_allocation_are_bounded():
     )
     combined = combine_allocations(core, sleeve, config)
     assert combined["weight"].sum() == pytest.approx(1.0)
-    assert combined.loc[combined["sleeve"].eq("core_5w"), "weight"].sum() == pytest.approx(
-        0.80
+    assert combined.loc[combined["sleeve"].eq("core_5w"), "weight"].sum() == pytest.approx(0.80)
+    assert combined.loc[combined["sleeve"].eq("opportunistic"), "weight"].sum() == pytest.approx(
+        0.20
     )
-    assert combined.loc[
-        combined["sleeve"].eq("opportunistic"), "weight"
-    ].sum() == pytest.approx(0.20)

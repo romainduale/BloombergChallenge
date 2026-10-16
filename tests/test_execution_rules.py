@@ -111,9 +111,9 @@ def test_existing_position_below_protective_stop_becomes_stop_sale():
 def test_execution_plan_maps_latest_fx_rate_by_asset(tmp_path):
     static_path = tmp_path / "static.csv"
     fx_path = tmp_path / "fx.csv"
-    pd.DataFrame(
-        {"id": ["USD_ASSET", "JPY_ASSET"], "currency": ["USD", "JPY"]}
-    ).to_csv(static_path, index=False)
+    pd.DataFrame({"id": ["USD_ASSET", "JPY_ASSET"], "currency": ["USD", "JPY"]}).to_csv(
+        static_path, index=False
+    )
     pd.DataFrame(
         {
             "date": ["2026-10-09", "2026-10-12"],
