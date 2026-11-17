@@ -1,237 +1,157 @@
-# Bloomberg Global Trading Challenge 2026 · ESILV
+# Bloomberg Global Trading Challenge 2026 
 
-Portefeuille quantitatif long-only de 1 M$ sur les actions de l'indice Bloomberg World Large, Mid & Small Cap (WLS).
+This repository presents the quantitative investment strategy developed by our ESILV team for the **Bloomberg Global Trading Challenge 2026**.
 
-> **À lire en premier :** [`docs/guide_utilisation_pipeline.md`](docs/guide_utilisation_pipeline.md)
-> explique simplement le fonctionnement complet, les résultats, le tutoriel PyCharm,
-> les fichiers importants et les prochaines améliorations.
+The competition consists of managing a $1 million virtual equity portfolio over several weeks, with the objective of outperforming the Bloomberg World Large, Mid & Small Cap Index (WLS).
 
-## Objectif
+Our approach combines statistical learning, quantitative risk management and constrained portfolio optimization to identify investment opportunities and generate systematic portfolio allocations.
 
-Le classement repose sur le rendement relatif face à l'indice WLS.
+### Investment constraints
 
-- **Objectif plancher** · battre l'indice
-- **Objectif cible** · finir dans le top 5 % des équipes
+- Initial capital: $1,000,000
+- Investment universe: WLS constituents
+- Long-only portfolio, without leverage or ETFs
+- Maximum exposure of 20% per security
+- Simulated transaction costs
 
-## Contraintes du règlement
+## Quantitative Strategy
 
-- Long-only, sans levier, sans ETF
-- Actions membres du WLS uniquement
-- 20 % maximum par position, dans l'optimiseur comme dans la couche d'exécution
-- 1 M$ investi en totalité dès la première semaine
-- Commissions simulées
+Our final strategy follows an 80/20 allocation framework:
 
-## Ligne rouge de la stratégie
+| Component | Allocation | Objective |
+|---|---:|---|
+| Quantitative core | 80% | Systematic benchmark outperformance |
+| Opportunistic portfolio | 20% | Capture higher-upside opportunities |
 
-Trois briques, chacune avec un rôle unique.
+### 1. Expected Return Estimation
 
-| Brique | Méthode | Rôle |
-|---|---|---|
-| 1. Rendements | Elastic Net en coupe transversale | Classer les titres selon leur rendement relatif attendu à 4 semaines pour le cœur final |
-| 2. Covariance | Shrinkage de Ledoit-Wolf | Estimer un risque stable sur 200 à 500 titres |
-| 3. Allocation | Optimisation robuste en poids actifs | Transformer prévisions et risque en poids, sous contraintes |
+We use a cross-sectional Elastic Net regression to estimate the expected relative returns of individual securities over a four-week investment horizon.
 
-**Brique 1 · Elastic Net**
-Un modèle commun à tous les titres, estimé sur un panel titre × semaine. La
-configuration finale utilise une cible et une purge de 4 semaines afin d'aligner le
-signal du 16 octobre 2026 sur la fin du challenge, le 13 novembre 2026. Les variantes
-historiques à 1 et 5 semaines restent disponibles dans `src/strategies/`.
+The model is trained on a stock-week panel using financial and market-based features. Combining L1 and L2 regularization helps control overfitting and multicollinearity while identifying relevant predictors.
 
-**Brique 2 · Ledoit-Wolf**
-Covariance estimée sur un an de rendements en USD, utilisée pour mesurer la tracking error face à l'indice.
+A complementary tail model is used to capture potential extreme-return opportunities and improve stock selection.
 
-**Brique 3 · Optimisation robuste**
-L'optimiseur raisonne en poids actifs (écart à l'indice), pas en poids absolus, pour éviter un biais de bêta implicite.
+Model validation relies on purged walk-forward testing to prevent look-ahead bias and assess out-of-sample predictive performance.
+
+### 2. Risk Modeling
+
+The covariance matrix is estimated using the Ledoit-Wolf shrinkage estimator on one year of historical USD-denominated returns.
+
+Compared with the empirical covariance matrix, shrinkage provides more stable risk estimates in a high-dimensional investment universe.
+
+Correlation screening is also implemented to limit portfolio concentration across highly correlated securities.
+
+### 3. Portfolio Optimization
+
+Expected returns and covariance estimates are combined within a constrained long-only allocation framework.
+
+The target optimization problem is formulated in active weights relative to the benchmark:
 
 $$
-\max_{w} \; \hat{\alpha}^{\top}(w - w_b) - \kappa \, \lVert \Omega^{1/2}(w - w_b) \rVert_2 - \gamma \, \lVert w - w_{prec} \rVert_1
+\max_w \quad
+\hat{\alpha}^{T}(w-w_b)
+-\kappa\sqrt{(w-w_b)^T\Omega(w-w_b)}
+-\gamma\|w-w_{prev}\|_1
 $$
 
-Avec w_b le benchmark répliqué, κ le paramètre de robustesse, γ la pénalité de rotation calée sur les commissions. Contraintes de positivité, somme à 100 %, 20 % par titre et tracking error maximale.
+Where:
 
-## Feuille de route
+- $\hat{\alpha}$: expected relative returns
+- $w_b$: benchmark weights
+- $\Omega$: estimated covariance matrix
+- $\kappa$: risk and robustness parameter
+- $\gamma$: turnover penalty
 
-- [x] Prototype Elastic Net transversal avec walk-forward purgé
-- [x] Prototype tail model et signal combiné
-- [x] Prototype Ledoit-Wolf, filtre de corrélation et allocation long-only
-- [x] Backtests sur cinq offsets et tests placebo du signal
-- [ ] Requêtes BQL (composition historique du WLS, prix hebdomadaires, variables point-in-time)
-- [ ] Panel réel et mesure de l'IC hors échantillon
-- [ ] Rendements ajustés dans une devise commune
-- [ ] Optimiseur en poids actifs avec tracking error et turnover
-- [x] Backtest exploratoire avec coûts, turnover et règles d'exécution paramétrables
-- [x] Ordres d'achat limite, conservation, réduction, vente et stop-loss
-- [x] Audit annuel, focus 2025-2026, drawdowns et biais de données
-- [x] Tests unitaires des nouvelles features et de la couche d'exécution
-- [x] Template de données et procédure d'import hebdomadaire
-- [x] Backtest à target 1 semaine et comparaison avec l'horizon 5 semaines
-- [x] Allocation finale 80 % stratégie 4 semaines et 20 % poche opportuniste inchangée
-- [x] Export des scores Elastic Net/Tail, bêta et contributions par feature
-- [x] Score opportuniste lisible : potentiel, risque, liquidité et justification
-- [ ] Validation avec le Faculty Advisor
-- [ ] Portefeuille initial prêt avant le lancement
+The objective balances expected outperformance, active risk and transaction costs under investment constraints.
 
-Documentation du projet :
+### 4. Opportunistic Allocation
 
-- [`docs/guide_pipeline_finale_4_semaines.md`](docs/guide_pipeline_finale_4_semaines.md) :
-  lancement de la pipeline finale, comparaison et réglage des profils prudent,
-  intermédiaire et agressif ;
-- [`docs/guide_utilisation_pipeline.md`](docs/guide_utilisation_pipeline.md) : guide
-  simple, résultats et tutoriel ;
-- [`docs/architecture_strategie.md`](docs/architecture_strategie.md) : détail technique
-  et écarts entre la stratégie cible et le code ;
-- [`docs/audit_execution_features.md`](docs/audit_execution_features.md) : audit détaillé
-  du backtest, des stops et des features ;
-- [`docs/audit_donnees.md`](docs/audit_donnees.md) : audit des données Bloomberg ;
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) : branches, pull requests et contrôles.
+The remaining 20% is allocated across four distinct securities, each representing 5% of the total portfolio.
 
-## Structure du dépôt
+Stock selection relies on a dedicated scoring model incorporating momentum, volatility, drawdown, liquidity and upside potential.
 
-```
+This allocation aims to complement the systematic core with higher-conviction opportunities.
+
+## Data
+
+The main data source is Bloomberg, through Bloomberg Query Language (BQL) and terminal exports.
+
+Yahoo Finance is used as a complementary source to refresh market prices and volumes.
+
+The research pipeline includes:
+
+- Data cleaning and feature engineering
+- Cross-sectional financial indicators
+- Historical returns and risk estimation
+- Forward relative-return targets
+- Benchmark and market data alignment
+
+Particular attention is given to data leakage, currency consistency and historical data quality.
+
+## Backtesting & Validation
+
+The research framework includes:
+
+- Purged walk-forward validation
+- Comparison of one-, four- and five-week investment horizons
+- Information coefficient and placebo tests
+- Transaction costs and portfolio turnover
+- Drawdown and execution analysis
+- Comparison of conservative, intermediate and aggressive risk profiles
+
+The primary performance criterion is relative performance against the WLS benchmark.
+
+## Repository Structure
+
+```text
 .
-├── README.md
-├── data/                          # exports partagés et zones de travail locales
-├── src/
-│   ├── elastic_net_transversal.py # brique 1
-│   ├── covariance.py              # brique 2
-│   ├── robust_optimizer_v1.py      # brique 3
-│   ├── backtest_portfolio_v1.py
-│   ├── backtest_execution_v2.py    # coûts, turnover, limites et stops
-│   ├── backtest_execution_1w.py    # rebalancement chaque semaine
-│   ├── refresh_feature_market_data.py # actualisation contrôlée prix/volumes
-│   ├── weekly_data_update.py       # import du template hebdomadaire
-│   ├── opportunistic_model.py      # score et allocation de la poche de 20 %
-│   ├── build_execution_plan.py     # ordres BUY/HOLD/REDUCE/SELL/SELL_STOP
-│   └── strategies/                 # une stratégie testée par dossier
-│       ├── one_week/
-│       ├── five_week/
-│       └── final_four_week/        # pipeline finale 80/20 et CSV explicable
-├── config/execution_profiles.json  # paramètres de risque et d'exécution
-├── config/portfolio_allocation.json # paramètres de l'allocation 80/20
-├── docs/                          # audits et architecture de la stratégie
-└── tests/                         # tests placebo et contrôles de conformité
+├── data/           # Raw and processed market data
+├── src/            # Models, optimization and backtesting
+│   └── strategies/ # Tested investment strategies
+├── config/         # Model and portfolio parameters
+├── docs/           # Research and technical documentation
+├── tests/          # Model and execution validation
+└── requirements.txt
 ```
 
-## Démarrage
+The code is organized into independent modules covering data processing, signal generation, risk estimation, portfolio construction and trade execution planning.
+
+## Getting Started
+
+Clone the repository and install the dependencies using Python 3.14:
 
 ```bash
 python3.14 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
-.venv/bin/python -m pytest
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-La chaîne de recherche s'exécute ensuite dans cet ordre :
+Run the final investment strategy:
 
 ```bash
-.venv/bin/python -m src.features
-.venv/bin/python -m src.validate_elastic_net
-.venv/bin/python -m src.validate_tail_model
-.venv/bin/python -m src.combined_signal_v1
-.venv/bin/python -m src.risk_screen_v1
-.venv/bin/python -m src.validate_optimizer_v1
-.venv/bin/python -m src.robust_optimizer_v1
-.venv/bin/python -m src.validate_portfolio_offsets
-```
-
-La pipeline jusqu'au plan d'ordres s'exécute en une commande :
-
-```bash
-.venv/bin/python -m src.run_pipeline --skip-features
-```
-
-La pipeline finale du challenge, à lancer après la clôture du vendredi 16 octobre,
-est :
-
-```bash
-.venv/bin/python -m src.strategies.final_four_week.pipeline \
+python -m src.strategies.final_four_week.pipeline \
   --refresh-market-data \
   --data-end 2026-10-16 \
   --require-signal-date 2026-10-16
 ```
 
-Elle produit
-`data/processed/strategies/final_four_week/final_allocation_explained.csv`. Ce fichier
-contient les scores Elastic Net et Tail, les rangs, les valeurs des six features, les
-bêta standardisés et la contribution de chaque feature à chaque score.
-
-Pour comparer les profils prudent, intermédiaire et agressif avec les mêmes périodes
-walk-forward :
+Run the test suite:
 
 ```bash
-.venv/bin/python -m src.strategies.final_four_week.compare_profiles
+python -m pytest
 ```
 
-Les paramètres sont centralisés dans `config/final_strategy_profiles.json` et les
-résultats dans `data/processed/strategies/profile_comparison/`.
+The pipeline generates portfolio allocations, individual stock scores, feature contributions and execution recommendations. Results are stored in `data/processed/`.
 
-Pour récupérer d'abord les nouveaux prix et volumes nécessaires aux six features
-de l'Elastic Net, puis produire le portefeuille cinq semaines sans stop :
+Bloomberg data must be available locally before running the complete pipeline.
 
-```bash
-.venv/bin/python -m src.run_pipeline --refresh-market-data --profile sans_stop
-```
+## Documentation
 
-Le téléchargement Yahoo est contrôlé sur les jours communs avec Bloomberg. Un
-titre dont le mapping ne recoupe pas l'historique est ignoré et signalé dans
-`data/processed/data_refresh/yahoo_feature_refresh.csv`. Le script ne remplace
-jamais le WLS par un proxy : la série du benchmark reste à actualiser depuis
-Bloomberg.
+- [Pipeline guide](docs/guide_utilisation_pipeline.md)
+- [Final investment strategy](docs/guide_pipeline_finale_4_semaines.md)
+- [Quantitative architecture](docs/architecture_strategie.md)
+- [Backtesting and execution audit](docs/audit_execution_features.md)
 
-La recherche hebdomadaire et sa comparaison avec la stratégie 5 semaines se lancent
-avec :
+---
 
-```bash
-.venv/bin/python -m src.run_weekly_research
-```
-
-Le template pour les données Bloomberg et les champs non disponibles sur Yahoo se trouve dans
-[`data/templates/weekly_data_template.xlsx`](data/templates/weekly_data_template.xlsx).
-
-Une fois les données Bloomberg importées, la stratégie 80/20 et son plan d'ordres
-se lancent avec :
-
-```bash
-.venv/bin/python -m src.run_pipeline --opportunistic
-```
-
-Ce lancement génère également deux exports simplifiés :
-
-- `data/processed/opportunistic/core_80_clean.csv` pour la poche cœur de 80 % ;
-- `data/processed/opportunistic/opportunistic_20_clean.csv` pour la poche
-  opportuniste de 20 %.
-
-Ils contiennent les titres retenus, leur devise, l'allocation en pourcentage et en
-dollars, les prix locaux et convertis en dollars, le score et la surperformance
-estimée à cinq semaines. Cette estimation est relative au benchmark et ne constitue
-pas une promesse de rendement.
-
-Dans la pipeline finale, les 80 % utilisent la stratégie quatre semaines sans stop.
-Les 20 % restants sont
-répartis sur quatre titres distincts, à 5 % chacun, après un filtre yfinance sur le
-momentum, le risque, le drawdown et la liquidité. Cette poche opportuniste est une
-première règle de sélection : ses règles et sa configuration n'ont pas été modifiées
-pour le passage du cœur de 5 à 4 semaines.
-
-Le profil par défaut n'active pas le stop-loss, car son test historique n'améliore
-pas encore le couple rendement/drawdown. Les variantes restent disponibles dans
-`config/execution_profiles.json`. Voir
-[`docs/audit_execution_features.md`](docs/audit_execution_features.md) pour les
-résultats annuels, le focus 2025-2026 et le test des features candidates.
-
-Les résultats sont écrits dans `data/processed/` et ne sont pas versionnés.
-
-## Garde-fous
-
-1. **Pas de fuite de données.** Toute variable doit être connue à la date t. Le test placebo (données sans signal) doit donner un IC proche de zéro.
-2. **IC réaliste.** Un IC compris entre 0,02 et 0,05 est normal. Au-delà de 0,08, chercher la fuite avant de s'en réjouir.
-3. **Indicateurs du backtest.** Probabilité de battre l'indice et probabilité de dépasser +10 % relatif, pas le ratio de Sharpe.
-4. **Règles figées.** Les paramètres sont fixés avant le lancement et ne changent pas pendant le challenge, sauf erreur avérée.
-
-## Points ouverts avec le Faculty Advisor
-
-- Calibrage du paramètre de robustesse κ face à un signal faible
-- Pilotage dynamique de la tracking error (CPPI relatif à cliquet)
-- Ajustement du bêta selon un signal de tendance sur l'indice
-- Barème exact des commissions et règles 2026 sur le cash
-
-La stratégie pourra évoluer après ces échanges. Toute modification de la ligne rouge est consignée dans ce fichier.
+*Developed by ESILV engineering students for the Bloomberg Global Trading Challenge 2026. This project is intended for academic and quantitative research purposes.*
